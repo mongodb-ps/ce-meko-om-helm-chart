@@ -1,0 +1,148 @@
+---
+apiVersion: mongodb.com/v1
+kind: MongoDBOpsManager
+metadata:
+  name: {{ .Values.deploymentName }}
+spec:
+  # Ops Manager HTTP(S) section
+  replicas: {{ .Values.opsManager.replicas }}
+  version: {{ .Values.opsManager.omVersion }}
+  adminCredentials: {{ .Values.opsManager.adminUserSecret }}
+  statefulSet:
+    spec:
+      volumeClaimTemplates:
+        - metadata:
+            name: mongodb-binaries
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            resources:
+              requests:
+                storage: 5Gi
+            storageClassName: ops-manager-binaries
+      template:
+        spec:
+          containers:
+            - name: mongodb-ops-manager
+            {{- if .Values.opsManager.localBinariesMountEnabled }}
+              volumeMounts:
+                - mountPath: /mongodb-ops-manager/mongodb-releases
+                  name: mongodb-binaries
+            {{- end }}
+              resources:
+                limits:
+                  cpu: {{ .Values.opsManager.podLimitCPU | quote }}
+                  memory: {{ .Values.opsManager.podLimitMemory }}
+                requests:
+                  cpu: {{ .Values.opsManager.podRequestsCPU | quote }}
+                  memory: {{ .Values.opsManager.podRequestsMemory }}
+          initContainers:
+          - name: mongodb-enterprise-init-ops-manager
+            resources:
+              limits:
+                cpu: {{ .Values.opsManager.initPodLimitCPU | quote }}
+                memory: {{ .Values.opsManager.initPodLimitMemory }}
+              requests:
+                cpu: {{ .Values.opsManager.initPodRequestsCPU | quote }}
+                memory: {{ .Values.opsManager.initPodRequestsMemory }}
+  configuration:
+    #mms.centralURL: "REQUIRED IF ACCESSED BY EXTERNAL DEPLOYMENTS"
+    mms.ignoreInitialUiSetup: "true"
+    automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
+    mms.adminEmailAddr: {{ .Values.opsManager.adminEmailAddress }}
+    mms.fromEmailAddr: {{ .Values.opsManager.fromEmailAddress }}
+    mms.replyToEmailAddr: {{ .Values.opsManager.replyEmailAddress }}
+    mms.mail.hostname: {{ .Values.opsManager.emailServerHostname }}
+    mms.mail.port: {{ .Values.opsManager.emailPort | quote }}
+    mms.mail.ssl: {{ .Values.opsManager.emailSecure | quote}}
+    mms.mail.transport: {{ .Values.opsManager.emailProtocol }}
+    mms.minimumTLSVersion: TLSv1.2
+
+  security:
+    tls:
+      secretRef:
+        name: {{ .Values.opsManager.tlsSecretName }}
+{{ if .Values.opsManager.extServiceEnabled }}
+  externalConnectivity:
+    type: {{ .Values.opsManager.extServiceType }}
+    {{- if eq .Values.opsManager.extServiceType "NodePort" }}
+    port: {{ .Values.opsManager.extServicePort }}
+    {{- end }}
+{{- end }}
+
+  # AppsDB section
+  applicationDatabase:
+    members: {{ .Values.appDB.replicas }}
+    version: {{ .Values.appDB.mdbVersion }}
+    passwordSecretKeyRef:
+      name: {{ .Values.appDB.adminSecretName }} 
+    security:
+      tls:
+        ca: {{ .Values.appDB.CAConfigmapName  }}
+        secretRef:
+          name: {{ .Values.appDB.tlsSecretName }}
+    podSpec:
+      cpu: {{ .Values.appDB.podLimitCPU | quote }}
+      memory: {{ .Values.appDB.podLimitMemory }}
+      persistence:
+        single:
+          storage: {{ .Values.appDB.storageSize }}
+          storageClass: {{ .Values.appDB.storageClass }}
+
+# Backup section
+  backup:
+    enabled: {{ .Values.opsManager.backupsSystemEnabled }}
+{{- if .Values.opsManager.backupsSystemEnabled }}
+    statefulSet:
+      spec:
+        {{- if .Values.opsManager.localBinariesMountEnabled }}
+        volumeClaimTemplates:
+          - metadata:
+              name: mongodb-binaries
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              resources:
+                requests:
+                  storage: {{ .Values.opsManager.binariesStorageSize }}
+              storageClassName: {{ .Values.opsManager.binariesStorageClass }}
+        {{- end }}
+        template:
+          spec:
+            containers:
+              - name: mongodb-backup-daemon
+                {{- if .Values.opsManager.localBinariesMountEnabled }}
+                volumeMounts:
+                  - mountPath: /mongodb-ops-manager/mongodb-releases
+                    name: mongodb-binaries
+                {{- end }}
+                resources:
+                  limits:
+                    cpu: {{ .Values.opsManager.backupPodLimitCPU | quote }}
+                    memory: {{ .Values.opsManager.backupPodLimitMemory }}
+                  requests:
+                    cpu: {{ .Values.opsManager.backupPodRequestsCPU | quote }}
+                    memory: {{ .Values.opsManager.backupPodRequestsMemory }}
+            initContainers:
+            - name: mongodb-enterprise-init-ops-manager
+              resources:
+                limits:
+                  cpu: {{ .Values.opsManager.backupInitPodLimitCPU | quote }}
+                  memory: {{ .Values.opsManager.backupInitPodLimitMemory }}
+                requests:
+                  cpu: {{ .Values.opsManager.backupInitPodRequestsCPU | quote }}
+                  memory: {{ .Values.opsManager.backupInitPodRequestsMemory }}
+    headDB:
+      storage: {{ .Values.opsManager.headDBStorageSize }}
+      storageClass: {{ .Values.opsManager.headDBStorageClass }}
+    opLogStores:
+      - name: oplog0
+        mongodbResourceRef:
+          name: oplog0
+        mongodbUserRef:
+          name: oploguser
+    blockStores:
+      - name: bs
+        mongodbResourceRef:
+          name: bs0
+        mongodbUserRef:
+          name: blockstoreuser
+{{- end }}

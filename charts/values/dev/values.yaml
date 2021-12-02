@@ -1,0 +1,50 @@
+---
+
+deploymentName: ops-manager
+
+opsManager:
+  omVersion: 4.4.19
+  replicas: 2
+  adminUserSecret: om-admin-user
+  binarySource: remote
+  tlsSecretName: ops-manager-cert
+  emailServerHostname: mail.mongodb.local
+  adminEmailAddress: support@mongodb.local
+  fromEmailAddress: support@mongodb.local
+  replyEmailAddress: support@mongodb.local
+  emailServerHostname: support@mongodb.local
+  emailPort: 465
+  emailSecure: true
+  emailProtocol: smtp
+  podLimitCPU: 4
+  podRequestsCPU: 2
+  podLimitMemory: 8Gi
+  podRequestsMemory: 4Gi
+  initPodLimitCPU: 2
+  initPodRequestsCPU: 1
+  initPodLimitMemory: 2Gi
+  initPodRequestsMemory: 1Gi
+  localBinariesMountEnabled: false
+  backupsSystemEnabled: false
+  binariesStorageClass: ops-manager-binaries
+  binariesStorageSize: 5Gi
+  backupInitPodLimitCPU: 2
+  backupInitPodRequestsCPU: 1
+  backupInitPodLimitMemory: 2Gi
+  backupInitPodRequestsMemory: 1Gi
+  headDBStorageSize: 1Gi
+  headDBStorageClass: ops-manager-backup-0
+  extServiceEnabled: true
+  extServiceType: NodePort
+  extServicePort: 32111
+
+appDB:
+  replicas: 3
+  mdbVersion: 5.0.1-ent
+  adminSecretName: om-db-user
+  tlsSecretName: ops-manager-db-cert
+  CAConfigmapName: custom-ca
+  podLimitCPU: 2
+  podLimitMemory: 2Gi
+  storageClass: appsdb
+  storageSize: 10Gi 
