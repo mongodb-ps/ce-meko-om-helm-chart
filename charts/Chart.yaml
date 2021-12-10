@@ -3,7 +3,7 @@ name: mongodb-replicaset
 version: 1.0
 appVersion: 1.0
 home: https://github.com/beergeek
-description: Deploy MongoDB Enterprise Replica Set, securely.
+description: Deploy MongoDB Ops Manager, securely.
 maintainers:
   - name: beergeek
-    email: beergeek1679@gmail.com
+    email: brett.gray@mongodb.com

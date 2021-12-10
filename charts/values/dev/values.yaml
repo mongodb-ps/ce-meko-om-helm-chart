@@ -25,18 +25,40 @@ opsManager:
   initPodLimitMemory: 2Gi
   initPodRequestsMemory: 1Gi
   localBinariesMountEnabled: false
-  backupsSystemEnabled: false
-  binariesStorageClass: ops-manager-binaries
-  binariesStorageSize: 5Gi
-  backupInitPodLimitCPU: 2
-  backupInitPodRequestsCPU: 1
-  backupInitPodLimitMemory: 2Gi
-  backupInitPodRequestsMemory: 1Gi
-  headDBStorageSize: 1Gi
-  headDBStorageClass: ops-manager-backup-0
   extServiceEnabled: true
   extServiceType: NodePort
   extServicePort: 32111
+  extCentralUrl: mongod3.mongodb.local:32111
+
+backups:
+  enabled: true
+  members: 2
+  head:
+    binariesMountEnabled: false
+    binariesStorageClass: ops-manager-binaries
+    binariesStorageSize: 5Gi
+    headDBStorageSize: 1Gi
+    storageClass: ops-manager-backup-0
+    storageSize: 4Gi
+    podLimitCPU: 2
+    podRequestsCPU: 1
+    podLimitMemory: 2Gi
+    podRequestsMemory: 1Gi
+    initPodLimitCPU: 2
+    initPodRequestsCPU: 1
+    initPodLimitMemory: 2Gi
+    initPodRequestsMemory: 1Gi
+  oplogStores:
+    stores:
+      - name: oplog0
+        mdbResource: oplog0
+        userResource: oplog0-om-user
+  blockstores:
+    stores:
+      - name: blockstore0
+        mdbResource: blockstore0
+        userResource: blockstore0-om-user
+  s3stores:
 
 appDB:
   replicas: 3

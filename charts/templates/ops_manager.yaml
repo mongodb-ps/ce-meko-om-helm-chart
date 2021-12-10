@@ -45,7 +45,9 @@ spec:
                 cpu: {{ .Values.opsManager.initPodRequestsCPU | quote }}
                 memory: {{ .Values.opsManager.initPodRequestsMemory }}
   configuration:
-    #mms.centralURL: "REQUIRED IF ACCESSED BY EXTERNAL DEPLOYMENTS"
+    {{- if .Values.opsManager.extServiceEnabled }}
+    mms.centralUrl: {{ .Values.opsManager.extCentralUrl }}
+    {{- end }}
     mms.ignoreInitialUiSetup: "true"
     automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
     mms.adminEmailAddr: {{ .Values.opsManager.adminEmailAddress }}
@@ -90,11 +92,12 @@ spec:
 
 # Backup section
   backup:
-    enabled: {{ .Values.opsManager.backupsSystemEnabled }}
-{{- if .Values.opsManager.backupsSystemEnabled }}
+    enabled: {{ .Values.backups.enabled }}
+{{- if .Values.backups.enabled }}
+    members: {{ .Values.backups.members | default 1 }}
     statefulSet:
       spec:
-        {{- if .Values.opsManager.localBinariesMountEnabled }}
+        {{- if .Values.backups.head.binariesMountEnabled }}
         volumeClaimTemplates:
           - metadata:
               name: mongodb-binaries
@@ -102,47 +105,72 @@ spec:
               accessModes: [ "ReadWriteOnce" ]
               resources:
                 requests:
-                  storage: {{ .Values.opsManager.binariesStorageSize }}
-              storageClassName: {{ .Values.opsManager.binariesStorageClass }}
+                  storage: {{ .Values.backups.head.binariesStorageSize }}
+              storageClassName: {{ .Values.backups.head.binariesStorageClass }}
         {{- end }}
         template:
           spec:
             containers:
               - name: mongodb-backup-daemon
-                {{- if .Values.opsManager.localBinariesMountEnabled }}
+                {{- if .Values.backups.head.binariesMountEnabled }}
                 volumeMounts:
                   - mountPath: /mongodb-ops-manager/mongodb-releases
                     name: mongodb-binaries
                 {{- end }}
                 resources:
                   limits:
-                    cpu: {{ .Values.opsManager.backupPodLimitCPU | quote }}
-                    memory: {{ .Values.opsManager.backupPodLimitMemory }}
+                    cpu: {{ .Values.backups.head.podLimitCPU | quote }}
+                    memory: {{ .Values.backups.head.podLimitMemory }}
                   requests:
-                    cpu: {{ .Values.opsManager.backupPodRequestsCPU | quote }}
-                    memory: {{ .Values.opsManager.backupPodRequestsMemory }}
+                    cpu: {{ .Values.backups.head.podRequestsCPU | quote }}
+                    memory: {{ .Values.backups.head.podRequestsMemory }}
             initContainers:
             - name: mongodb-enterprise-init-ops-manager
               resources:
                 limits:
-                  cpu: {{ .Values.opsManager.backupInitPodLimitCPU | quote }}
-                  memory: {{ .Values.opsManager.backupInitPodLimitMemory }}
+                  cpu: {{ .Values.backups.head.initPodLimitCPU | quote }}
+                  memory: {{ .Values.backups.head.initPodLimitMemory }}
                 requests:
-                  cpu: {{ .Values.opsManager.backupInitPodRequestsCPU | quote }}
-                  memory: {{ .Values.opsManager.backupInitPodRequestsMemory }}
+                  cpu: {{ .Values.backups.head.initPodRequestsCPU | quote }}
+                  memory: {{ .Values.backups.head.initPodRequestsMemory }}
     headDB:
-      storage: {{ .Values.opsManager.headDBStorageSize }}
-      storageClass: {{ .Values.opsManager.headDBStorageClass }}
+      storage: {{ .Values.backups.head.storageSize }}
+      storageClass: {{ .Values.backups.head.storageClass }}
     opLogStores:
-      - name: oplog0
+    {{- range .Values.backups.oplogStores.stores }}
+      - name: {{ .name }}
         mongodbResourceRef:
-          name: oplog0
+          name: {{ .mdbResource }}
         mongodbUserRef:
-          name: oploguser
+          name: {{ .userResource }}
+    {{- end }}
+    {{- if .Values.backups.blockstores }}
+    {{- if gt (len .Values.backups.blockstores.stores) 0  }}
     blockStores:
-      - name: bs
+    {{- range .Values.backups.blockstores.stores }}
+      - name: {{ .name }}
         mongodbResourceRef:
-          name: bs0
+          name: {{ .mdbResource }}
         mongodbUserRef:
-          name: blockstoreuser
+          name: {{ .userResource }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.backups.s3stores }}
+    {{- if gt (len .Values.backups.s3stores.stores) 0  }}
+    s3Stores:
+    {{- range .Values.backups.s3stores.stores }}
+      - name: {{ .name }}
+        mongodbResourceRef:
+          name: {{ .mdbResource }}
+        mongodbUserRef:
+          name: {{ .userResource }}
+        s3SecretRef:
+          name: {{ .s3secret}}
+        pathStyleAccessEnabled: {{ .pathStyleEnabled | default true }}
+        s3BucketEndpoint: {{ .bucketEndpoint | quote }}
+        s3BucketName: {{ .bucketName }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
 {{- end }}
