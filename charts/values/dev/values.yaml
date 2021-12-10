@@ -37,7 +37,6 @@ backups:
     binariesMountEnabled: false
     binariesStorageClass: ops-manager-binaries
     binariesStorageSize: 5Gi
-    headDBStorageSize: 1Gi
     storageClass: ops-manager-backup-0
     storageSize: 4Gi
     podLimitCPU: 2
