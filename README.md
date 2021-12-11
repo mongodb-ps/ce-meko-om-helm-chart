@@ -172,10 +172,6 @@ The following table describes the values required in the relevant `values.yaml`:
 |backups.blockstores.stores[].name|The name to be used for the Block Store configuration within Ops Manager|
 |backups.blockstores.stores[].mdbResource|The Kubernetes resource name of the Block Store MongoDB replica set (must be created in advance)|
 |backups.blockstores.stores[].userResource|The Kubernetes resource name of the Block Store MongoDB User (must be created in advance)|
-|backups.blockstores.stores[]
-|backups.blockstores.stores[]name||
-|backups.blockstores.stores[]mdbResource||
-|backups.blockstores.stores[]userResource||
 |backups.s3stores[]||
 |backups.s3stores[].name||
 |backups.s3stores[].mdbResource||
