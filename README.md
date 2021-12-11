@@ -147,13 +147,13 @@ The following table describes the values required in the relevant `values.yaml`:
 |opsManager.localBinariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
 |opsManager.extServiceEnabled|Boolean to determine if access to Ops Manager from clients/users external to Kubernetes is required|
 |opsManager.extServiceType|The service type created for external access. Selection is `NodePort` or `LoadBalancer`|
-|opsManager.extServicePort|
-|opsManager.extCentralUrl|
+|opsManager.extServicePort|The Kubernetes port number to use for the NodePort, if `NodePort` is selected for `opsManager.extServiceType`|
+|opsManager.extCentralUrl|The URL, including port, that will be used by clients external to Kubernetes for the Ops Manager service|
 |backups.enabled|Boolean to determine if the backup system for Ops Manager is enabled|
 |backups.members|Number of backup daemons to create. One is normally enough|
-|backups.head.binariesMountEnabled|
-|backups.head.binariesStorageClass|
-|backups.head.binariesStorageSize||
+|backups.head.binariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
+|backups.head.binariesStorageClass|The Kubernetes StorageClass to be used for the binaries mount|
+|backups.head.binariesStorageSize||The size, including units, for the binaries mount|
 |backups.head.storageClass||
 |backups.head.storageSize||
 |backups.head.podLimitCPU||
