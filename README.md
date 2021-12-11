@@ -126,28 +126,27 @@ The following table describes the values required in the relevant `values.yaml`:
 |deploymentName|The name for the Ops Manager deployment (becomes the Kubernetes resource name)|
 |opsManager.omVersion|Version of Ops Manager to use|
 |opsManager.replicas|Number of Ops Manager application servers to deploy|
-|opsManager.adminUserSecret|
-|opsManager.binarySource|
-|opsManager.tlsSecretName|
-|opsManager.emailServerHostname|
-|opsManager.adminEmailAddress|
-|opsManager.fromEmailAddress|
-|opsManager.replyEmailAddress|
-|opsManager.emailServerHostname|
-|opsManager.emailPort|
-|opsManager.emailSecure|
-|opsManager.emailProtocol|
-|opsManager.podLimitCPU|
-|opsManager.podRequestsCPU|
-|opsManager.podLimitMemory|
-|opsManager.podRequestsMemory|
-|opsManager.initPodLimitCPU|
-|opsManager.initPodRequestsCPU|
-|opsManager.initPodLimitMemory|
-|opsManager.initPodRequestsMemory|
-|opsManager.localBinariesMountEnabled|
-|opsManager.extServiceEnabled|
-|opsManager.extServiceType|
+|opsManager.adminUserSecret|The name of the Kubernetes secret containing the first user's password for Ops Manager|
+|opsManager.binarySource|The source for the MongoDB binaries. Can be `local`, `hybrid`, or `remote`|
+|opsManager.tlsSecretName|The Kubernetes TLS secret containing the X.509 certificate for Ops Manager application servers|
+|opsManager.emailServerHostname|The email server FQDN|
+|opsManager.adminEmailAddress|The email address of the Admin user for Ops Manager|
+|opsManager.fromEmailAddress|The fram email address used by Ops Manager when sending emails|
+|opsManager.replyEmailAddress|The email address used as the `reply-to` address for emails sent by Ops Manager|
+|opsManager.emailPort|The port used by the email server|
+|opsManager.emailSecure|Boolean to determine if TLS is used for email communications|
+|opsManager.emailProtocol|The protocol used by the email server. `smtp` or `smtps`|
+|opsManager.podLimitCPU|The maximum CPUs that can be allocated to the Ops Manager application container|
+|opsManager.podRequestsCPU|The initial CPUs allocated to the Ops Manager application application container|
+|opsManager.podLimitMemory|The maximum memory that can be allocated to the Ops Manager application container|
+|opsManager.podRequestsMemory|The initial memory allocated to the Ops Manager application container|
+|opsManager.initPodLimitCPU|The maximum CPUs that can be allocated to the Ops Manager init container|
+|opsManager.initPodRequestsCPU|The initial CPUs allocated to the Ops Manager application init container|
+|opsManager.initPodLimitMemory|The maximum memory that can be allocated to the Ops Manager init container|
+|opsManager.initPodRequestsMemory|The initial memory allocated to the Ops Manager init container|
+|opsManager.localBinariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
+|opsManager.extServiceEnabled|Boolean to determine if access to Ops Manager from clients/users external to Kubernetes is required|
+|opsManager.extServiceType|The service type created for external access. Selection is `NodePort` or `LoadBalancer`|
 |opsManager.extServicePort|
 |opsManager.extCentralUrl|
 |backups.enabled|Boolean to determine if the backup system for Ops Manager is enabled|

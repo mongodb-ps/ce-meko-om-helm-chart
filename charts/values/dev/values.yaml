@@ -12,7 +12,6 @@ opsManager:
   adminEmailAddress: support@mongodb.local
   fromEmailAddress: support@mongodb.local
   replyEmailAddress: support@mongodb.local
-  emailServerHostname: support@mongodb.local
   emailPort: 465
   emailSecure: true
   emailProtocol: smtp
