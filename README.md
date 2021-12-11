@@ -153,18 +153,18 @@ The following table describes the values required in the relevant `values.yaml`:
 |backups.members|Number of backup daemons to create. One is normally enough|
 |backups.head.binariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
 |backups.head.binariesStorageClass|The Kubernetes StorageClass to be used for the binaries mount|
-|backups.head.binariesStorageSize||The size, including units, for the binaries mount|
-|backups.head.storageClass||
-|backups.head.storageSize||
-|backups.head.podLimitCPU||
-|backups.head.podRequestsCPU||
-|backups.head.podLimitMemory||
-|backups.head.podRequestsMemory||
-|backups.head.initPodLimitCPU||
-|backups.head.initPodRequestsCPU||
-|backups.head.initPodLimitMemory||
-|backups.head.initPodRequestsMemory||
-|backups.oplogStores.stores[]
+|backups.head.binariesStorageSize|The size, including units, for the binaries mount|
+|backups.head.storageClass|The Kubernetes StorageClass for the Head database. Required if `backups.enabled` is `true`|
+|backups.head.storageSize|The size, including units, for the Head database storage|
+|backups.head.podLimitCPU|The maximum CPUs that can be allocated to the Head database container|
+|backups.head.podRequestsCPU|The initial CPUs allocated to the Head database container|
+|backups.head.podLimitMemory|The maximum memory that can be allocated to the Head database container|
+|backups.head.podRequestsMemory|The initial memory allocated to the Head database container|
+|backups.head.initPodLimitCPU|The maximum CPUs that can be allocated to the Head init container|
+|backups.head.initPodRequestsCPU|The initial CPUs allocated to the Head init container|
+|backups.head.initPodLimitMemory|The maximum memory that can be allocated to the Head init container|
+|backups.head.initPodRequestsMemory|The initial memory allocated to the Head init container|
+|backups.oplogStores.stores[]|AAn array of objects containing details on required Oplog Stores|
 |backups.oplogStores.stores[].name||
 |backups.oplogStores.stores[].mdbResource||
 |backups.oplogStores.stores[].userResource||
@@ -180,7 +180,7 @@ The following table describes the values required in the relevant `values.yaml`:
 |backups.s3stores[].pathStyleEnabled||
 |backups.s3stores[].bucketEndpoint||
 |backups.s3stores[].bucketName||
-|backups.appDB.replicas||
+|backups.appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
 |backups.appDB.mdbVersion||
 |backups.appDB.adminSecretName||
 |backups.appDB.tlsSecretName||
