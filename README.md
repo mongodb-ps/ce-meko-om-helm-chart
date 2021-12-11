@@ -164,10 +164,14 @@ The following table describes the values required in the relevant `values.yaml`:
 |backups.head.initPodRequestsCPU|The initial CPUs allocated to the Head init container|
 |backups.head.initPodLimitMemory|The maximum memory that can be allocated to the Head init container|
 |backups.head.initPodRequestsMemory|The initial memory allocated to the Head init container|
-|backups.oplogStores.stores[]|AAn array of objects containing details on required Oplog Stores|
-|backups.oplogStores.stores[].name||
-|backups.oplogStores.stores[].mdbResource||
-|backups.oplogStores.stores[].userResource||
+|backups.oplogStores.stores[]|An array of objects containing details on required Oplog Stores|
+|backups.oplogStores.stores[].name|The name to be used for the Oplog Store configuration within Ops Manager|
+|backups.oplogStores.stores[].mdbResource|The Kubernetes resource name of the Opolog Store MongoDB replica set (must be created in advance)|
+|backups.oplogStores.stores[].userResource|The Kubernetes resource name of the Opolog Store MongoDB User (must be created in advance)|
+|backups.blockstores.stores[]|An array of objects containing details on required Block Stores|
+|backups.blockstores.stores[].name|The name to be used for the Block Store configuration within Ops Manager|
+|backups.blockstores.stores[].mdbResource|The Kubernetes resource name of the Block Store MongoDB replica set (must be created in advance)|
+|backups.blockstores.stores[].userResource|The Kubernetes resource name of the Block Store MongoDB User (must be created in advance)|
 |backups.blockstores.stores[]
 |backups.blockstores.stores[]name||
 |backups.blockstores.stores[]mdbResource||
