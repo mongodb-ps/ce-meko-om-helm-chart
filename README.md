@@ -172,12 +172,12 @@ The following table describes the values required in the relevant `values.yaml`:
 |backups.blockstores.stores[].name|The name to be used for the Block Store configuration within Ops Manager|
 |backups.blockstores.stores[].mdbResource|The Kubernetes resource name of the Block Store MongoDB replica set (must be created in advance)|
 |backups.blockstores.stores[].userResource|The Kubernetes resource name of the Block Store MongoDB User (must be created in advance)|
-|backups.s3stores[]||
-|backups.s3stores[].name||
-|backups.s3stores[].mdbResource||
-|backups.s3stores[].userResource||
-|backups.s3stores[].s3secret||
-|backups.s3stores[].pathStyleEnabled||
+|backups.s3stores[]|An array if objects containing details of S3 stores for backups|
+|backups.s3stores[].name|The name given to the S3 store in Ops Manager|
+|backups.s3stores[].mdbResource|The Kubernetes resource name of the MongoDB replica set used for metadata (must be created in advance)|
+|backups.s3stores[].userResource|The Kubernetes resource name of the MongoDB User for the metadata database replica set (must be created in advance)|
+|backups.s3stores[].s3secret|The Kubernetes Secert resource name that contains the access AWS access key and username|
+|backups.s3stores[].pathStyleEnabled|Boolean to determine of path style is used (true) or virtual-host-style (false) URL endpoint are used|
 |backups.s3stores[].bucketEndpoint||
 |backups.s3stores[].bucketName||
 |backups.appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
