@@ -10,10 +10,10 @@
   - [Prerequisites](#prerequisites)
     - [CA Certificate for Ops Manager _REQUIRED_](#ca-certificate-for-ops-manager-required)
     - [TLS Secret for Ops Manager Application Servers _HIGHLY ENCOURAGED_](#tls-secret-for-ops-manager-application-servers-highly-encouraged)
-    - [CA Certificate for MongoDB Deployments _HIGHLY ENCOURAGED_](#ca-certificate-for-mongodb-deployments-highly-encouraged)
-    - [TLS Secrets for MongoDB Deployments _HIGHLY ENCOURAGED_](#tls-secrets-for-mongodb-deployments-highly-encouraged)
+    - [CA Certificate for AppDB _HIGHLY ENCOURAGED_](#ca-certificate-for-appdb-highly-encouraged)
+    - [TLS Secrets for AppDB _HIGHLY ENCOURAGED_](#tls-secrets-for-appdb-highly-encouraged)
     - [Ops Manager First User _REQUIRED_](#ops-manager-first-user-required)
-    - [MongoDB First User _REQUIRED_](#mongodb-first-user-required)
+    - [MongoDB Admin User _REQUIRED_](#mongodb-admin-user-required)
   - [Set Up](#set-up)
     - [deploymentName](#deploymentname)
     - [opsManager.omVersion](#opsmanageromversion)
@@ -43,17 +43,21 @@
     - [opsManager.extServiceType](#opsmanagerextservicetype)
     - [opsManager.extServicePort](#opsmanagerextserviceport)
     - [opsManager.extCentralUrl](#opsmanagerextcentralurl)
-    - [appDB.replicas: 3](#appdbreplicas-3)
-    - [appDB.mdbVersion: 5.0.1-ent](#appdbmdbversion-501-ent)
-    - [appDB.adminSecretName: om-db-us](#appdbadminsecretname-om-db-us)
-    - [appDB.tlsSecretName: ops-manage](#appdbtlssecretname-ops-manage)
-    - [appDB.CAConfigmapName: custom-c](#appdbcaconfigmapname-custom-c)
-    - [appDB.podLimitCPU: 2](#appdbpodlimitcpu-2)
-    - [appDB.podRequestsCPU: 2](#appdbpodrequestscpu-2)
-    - [appDB.podLimitMemory: 2Gi](#appdbpodlimitmemory-2gi)
-    - [appDB.podRequestsMemory: 2Gi](#appdbpodrequestsmemory-2gi)
-    - [appDB.storageClass: appsdb](#appdbstorageclass-appsdb)
-    - [appDB.storageSize: 10Gi](#appdbstoragesize-10gi)
+    - [appDB.replicas](#appdbreplicas)
+    - [appDB.mdbVersion](#appdbmdbversion)
+    - [appDB.adminSecretName](#appdbadminsecretname)
+    - [appDB.tlsSecretName](#appdbtlssecretname)
+    - [appDB.CAConfigmapName](#appdbcaconfigmapname)
+    - [appDB.podLimitCPU](#appdbpodlimitcpu)
+    - [appDB.podRequestsCPU](#appdbpodrequestscpu)
+    - [appDB.podLimitMemory](#appdbpodlimitmemory)
+    - [appDB.podRequestsMemory](#appdbpodrequestsmemory)
+    - [appDB.initPodLimitCPU](#appdbinitpodlimitcpu)
+    - [appDB.initPodRequestsCPU](#appdbinitpodrequestscpu)
+    - [appDB.initPodLimitMemory](#appdbinitpodlimitmemory)
+    - [appDB.initPodRequestsMemory](#appdbinitpodrequestsmemory)
+    - [appDB.storageClass](#appdbstorageclass)
+    - [appDB.storageSize](#appdbstoragesize)
   - [Run](#run)
 
 ## Description
@@ -112,7 +116,7 @@ kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <deploymentN
 
 **REQUIRED** if `tls.enabled` is `true`.
 
-### CA Certificate for MongoDB Deployments _HIGHLY ENCOURAGED_
+### CA Certificate for AppDB _HIGHLY ENCOURAGED_
 
 The certificate must include the whole certificate chain of the Certificate Authority that signed the X.509 certificate for pods. 
 
@@ -127,32 +131,24 @@ This is most likely common in all MongoDB deployments.
 
 **REQUIRED** if `tls.enabled` is `true`.
 
-### TLS Secrets for MongoDB Deployments _HIGHLY ENCOURAGED_
+### TLS Secrets for AppDB _HIGHLY ENCOURAGED_
 
-This requires two secrets: one for the client communications and one for cluster communications.
+This requires a Kubernetes TLS secert in a certain format.
 
 The secrets contain the X.509 key and certificate. One key/certificate pair is used for all members of the replica set, therefore a Subject Alternate Name (SAN) entry must exist for each member of the replica set. The SANs will be in the form of:
 
-**\<replicaSetName\>-\<X\>.\<replicaSetName\>.\<namespace\>**
+**\<deploymentName\>-db-\<X\>.\<replicaSetName\>.\<namespace\>**
 
-Where `<replicaSetName>` is the `replicaSetName` in the `values.yaml` for your deployment and `<X>` is the 0-based number of the pod.
+Where `<deploymentName>` is the `deploymentName` in the `values.yaml` for your deployment and `<X>` is the 0-based number of the pod.
 
-The certificates must include the name of FQDN external to Kubernetes as a Subject Alternate Name (SAN) if external access is required. 
+The secret must be named as follows:
 
-The secrets must be named as follows:
+**\<deploymentName\>-appdb-\<cert\>**
 
-**\<replicaSetName\>-\<cert\>**
-
-**\<replicaSetName\>-\<clusterfile\>**
-
-The two secrets can be created as follows:
+The secret can be created as follows:
 
 ```shell
-kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <replicaSetName>-cert \
-  --cert=<path-to-cert> \
-  --key=<path-to-key>
-
-kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <replicaSetName>-clusterfile \
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <deploymentName>-appdb-cert \
   --cert=<path-to-cert> \
   --key=<path-to-key>
 ```
@@ -169,9 +165,9 @@ kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret generic <adminus
   --from-literal=LastName="<lastname>"
 ```
 
-### MongoDB First User _REQUIRED_
+### MongoDB Admin User _REQUIRED_
 
-A secret must exist for the first user in MongoDB. This will be a user with the `root` role. The name of the secret must be set in the releveant `values.yaml` as `rootSecret` value. The secret must contain a key called `password` that contains the password for the user. The username is set to `root`.
+A secret must exist for the admin user of the AppDB. The name of the secret must be set in the releveant `values.yaml` as `adminSecretName` value. The secret must contain a key called `password` that contains the password for the user. The username is set to `mongodb-ops-manager` by the Kubernetes Operator.
 
 The secret can be create via `kubectl` as follows:
 
@@ -179,8 +175,6 @@ The secret can be create via `kubectl` as follows:
 kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret generic <name-of-secret> \
   --from-literal=password=<password>
 ```
-
-The name of the user that is created has the pattern of **ap-\<replicaSetName\>-root**, where `<replicaSetName>` is the `replicaSetName` in the `values.yaml` for your deployment.
 
 ## Set Up
 
@@ -403,21 +397,77 @@ The FQDN that will be used by external clients to gain access to Ops Manager. Th
 
 Only required if `opsManager.extServiceType` is set to `true`.
 
-### appDB.replicas: 3
-### appDB.mdbVersion: 5.0.1-ent
-### appDB.adminSecretName: om-db-us
-### appDB.tlsSecretName: ops-manage
-### appDB.CAConfigmapName: custom-c
-### appDB.podLimitCPU: 2
-### appDB.podRequestsCPU: 2
-### appDB.podLimitMemory: 2Gi
-### appDB.podRequestsMemory: 2Gi
-### appDB.storageClass: appsdb
-### appDB.storageSize: 10Gi 
+### appDB.replicas
+
+Number of replica members to create in the AppDB replica set, this should be at least `3` and an odd number.
+
+### appDB.mdbVersion
+
+The MongoDB version that will be deployed as the AppDB. This must aligned with a tag in the quay.io repository for [mongodb-enterprise-appdb-database](https://quay.io/repository/mongodb/mongodb-enterprise-appdb-database?tab=tags).
+
+### appDB.adminSecretName
+
+The name of the Kubernetes Secret for the MongoDB admin user (mongodb-ops-manager) for the AppDB. The key within th esecret must be called `password`. 
+
+See further information in the [MongoDB Admin User](#mongodb-admin-user-required) section.
+
+### appDB.tlsSecretName
+
+The name of the Kubernets TLS Secret that contains the X.509 key and certificate for the AppDB.
+
+Details on this secret can be found in the [TLS Secrets for AppDB](#tls-secrets-for-appdb-highly-encouraged) section.
+
+### appDB.CAConfigmapName
+
+The name of the Kubernetes Configmap containing the CA X.509 certificate associated with the TLS certificates.
+
+Further information can be found on this in the [CA Certificate for AppDB](#ca-certificate-for-appdb-highly-encouraged) section.
+
+### appDB.podLimitCPU
+
+The CPU limit that can be assigned to each AppDB pod.
+
+### appDB.podRequestsCPU
+
+The initial CPUs assigned to each AppDB pod.
+
+### appDB.podLimitMemory
+
+The maximum memory that can be assigned to each AppDB pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### appDB.podRequestsMemory
+
+The initial memory assigned to each AppDB pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### appDB.initPodLimitCPU
+
+The CPU limit that can be assigned to each AppDB init pod.
+
+### appDB.initPodRequestsCPU
+
+The initial CPUs assigned to each AppDB init pod.
+
+### appDB.initPodLimitMemory
+
+The maximum memory that can be assigned to each AppDB init pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### appDB.initPodRequestsMemory
+
+The initial memory assigned to each AppDB init pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### appDB.storageClass
+
+The name of the Kubernetes StorageClass that will be used for persistent storage for the AppDB.
+
+### appDB.storageSize
+
+The size of the storage that will be allocated to the pods from the `appDB.stroageClass`. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
 
 
 
 
+
+[WIP]
 backups:
   enabled: false
   members: 2
