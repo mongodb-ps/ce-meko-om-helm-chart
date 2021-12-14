@@ -80,8 +80,14 @@
     - [backups.blockstores[]](#backupsblockstores)
     - [backups.blockstores[].name](#backupsblockstoresname)
     - [backups.blockstores[].mdbResource](#backupsblockstoresmdbresource)
-    - [backups.blockstores[].userResource: block](#backupsblockstoresuserresource-block)
-    - [backups.s3stores:](#backupss3stores)
+    - [backups.blockstores[].userResource](#backupsblockstoresuserresource)
+    - [backups.s3stores[]:](#backupss3stores)
+    - [backups.s3stores[].name](#backupss3storesname)
+    - [backups.s3stores[].mdbResource](#backupss3storesmdbresource)
+    - [backups.s3stores[].userResource](#backupss3storesuserresource)
+    - [backups.s3stores[].s3secret](#backupss3storess3secret)
+    - [backups.s3stores[].](#backupss3stores-1)
+    - [backups.s3stores[].](#backupss3stores-2)
   - [Run](#run)
 
 ## Description
@@ -575,7 +581,7 @@ The name of the Kubernetes MongoDB User resource that has the required privilege
 
 ### backups.blockstores[]
 
-An array of Blockstore resources.
+An array of Blockstore resources for snapshots.
 
 This or s3stores is required if `backups.enabled` is `true`.
 
@@ -587,8 +593,32 @@ The name that will be configured for the Blockstore resource.
 
 The name of the Kubernetes MongoDB resource that is selected as this particular Blockstore.
 
-### backups.blockstores[].userResource: block
-### backups.s3stores:
+### backups.blockstores[].userResource
+
+The name of the Kubernetes MongoDB User resource that has the required privileges to be the backup user for the MongoDB resource.
+
+### backups.s3stores[]:
+
+An array of S3 resources for snapshots.
+
+### backups.s3stores[].name
+
+The name that will be configured for the S3 snapshot store resource.
+
+### backups.s3stores[].mdbResource
+
+The name of the Kubernetes MongoDB resource that is selected as the MongoDB replica set for metadata.
+
+### backups.s3stores[].userResource
+
+The name of the Kubernetes MongoDB User resource that has the required privileges to be the backup user for the MongoDB resource used as the metadata store.
+
+### backups.s3stores[].s3secret
+
+The name of the Kubernetes secret that contains the various AWS keys and usernames for the S3 device.
+
+### backups.s3stores[].
+### backups.s3stores[].
 
 ## Run
 
