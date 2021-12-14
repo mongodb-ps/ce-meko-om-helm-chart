@@ -9,10 +9,38 @@
   - [Steps to Deploy](#steps-to-deploy)
   - [Prerequisites](#prerequisites)
     - [CA Certificate for Ops Manager _REQUIRED_](#ca-certificate-for-ops-manager-required)
+    - [TLS Secret for Ops Manager Application Servers _HIGHLY ENCOURAGED_](#tls-secret-for-ops-manager-application-servers-highly-encouraged)
     - [CA Certificate for MongoDB Deployments _HIGHLY ENCOURAGED_](#ca-certificate-for-mongodb-deployments-highly-encouraged)
-    - [TLS PEM Files for MongoDB Deployments _HIGHLY ENCOURAGED_](#tls-pem-files-for-mongodb-deployments-highly-encouraged)
+    - [TLS Secrets for MongoDB Deployments _HIGHLY ENCOURAGED_](#tls-secrets-for-mongodb-deployments-highly-encouraged)
+    - [Ops Manager First User _REQUIRED_](#ops-manager-first-user-required)
     - [MongoDB First User _REQUIRED_](#mongodb-first-user-required)
   - [Set Up](#set-up)
+    - [deploymentName](#deploymentname)
+    - [opsManager.omVersion](#opsmanageromversion)
+    - [opsManager.replicas:](#opsmanagerreplicas)
+    - [opsManager.adminUserSecret:](#opsmanageradminusersecret)
+    - [opsManager.binarySource:](#opsmanagerbinarysource)
+    - [opsManager.tlsSecretName](#opsmanagertlssecretname)
+    - [opsManager.emailServerHostname](#opsmanageremailserverhostname)
+    - [opsManager.adminEmailAddress](#opsmanageradminemailaddress)
+    - [opsManager.fromEmailAddress](#opsmanagerfromemailaddress)
+    - [opsManager.replyEmailAddress:](#opsmanagerreplyemailaddress)
+    - [opsManager.emailPort: 465](#opsmanageremailport-465)
+    - [opsManager.emailSecure: true](#opsmanageremailsecure-true)
+    - [opsManager.emailProtocol: smtp](#opsmanageremailprotocol-smtp)
+    - [opsManager.podLimitCPU: 4](#opsmanagerpodlimitcpu-4)
+    - [opsManager.podRequestsCPU: 2](#opsmanagerpodrequestscpu-2)
+    - [opsManager.podLimitMemory: 8Gi](#opsmanagerpodlimitmemory-8gi)
+    - [opsManager.podRequestsMemory: 4Gi](#opsmanagerpodrequestsmemory-4gi)
+    - [opsManager.initPodLimitCPU: 2](#opsmanagerinitpodlimitcpu-2)
+    - [opsManager.initPodRequestsCPU: 1](#opsmanagerinitpodrequestscpu-1)
+    - [opsManager.initPodLimitMemory: 2Gi](#opsmanagerinitpodlimitmemory-2gi)
+    - [opsManager.initPodRequestsMemory: 1G](#opsmanagerinitpodrequestsmemory-1g)
+    - [opsManager.localBinariesMountEnabled](#opsmanagerlocalbinariesmountenabled)
+    - [opsManager.extServiceEnabled: true](#opsmanagerextserviceenabled-true)
+    - [opsManager.extServiceType: NodePort](#opsmanagerextservicetype-nodeport)
+    - [opsManager.extServicePort: 32111](#opsmanagerextserviceport-32111)
+    - [opsManager.extCentralUrl: mongod3.mo](#opsmanagerextcentralurl-mongod3mo)
 - [Notes](#notes)
 
 ## Description
@@ -53,6 +81,24 @@ kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create configmap <name-of-conf
 
 This is most likely common in all MongoDB deployments.
 
+### TLS Secret for Ops Manager Application Servers _HIGHLY ENCOURAGED_
+
+This requires one Kubernetes TLS secret.
+
+The secrets contain the X.509 key and certificate. A Subject Alternate Name (SAN) entry must exist for the service.
+
+The certificate must include the name of FQDN external to Kubernetes as a Subject Alternate Name (SAN) if external access is required. 
+
+The secret can be created as follows:
+
+```shell
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <deploymentName>-cert \
+  --cert=<path-to-cert> \
+  --key=<path-to-key>
+```
+
+**REQUIRED** if `tls.enabled` is `true`.
+
 ### CA Certificate for MongoDB Deployments _HIGHLY ENCOURAGED_
 
 The certificate must include the whole certificate chain of the Certificate Authority that signed the X.509 certificate for pods. 
@@ -68,7 +114,7 @@ This is most likely common in all MongoDB deployments.
 
 **REQUIRED** if `tls.enabled` is `true`.
 
-### TLS PEM Files for MongoDB Deployments _HIGHLY ENCOURAGED_
+### TLS Secrets for MongoDB Deployments _HIGHLY ENCOURAGED_
 
 This requires two secrets: one for the client communications and one for cluster communications.
 
@@ -99,6 +145,16 @@ kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <replicaSetN
 ```
 
 **REQUIRED** if `tls.enabled` is `true`.
+
+### Ops Manager First User _REQUIRED_
+
+```shell
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret generic <adminusercredentials> \
+  --from-literal=Username="<username>" \
+  --from-literal=Password="<password>" \
+  --from-literal=FirstName="<firstname>" \
+  --from-literal=LastName="<lastname>"
+```
 
 ### MongoDB First User _REQUIRED_
 
@@ -178,17 +234,138 @@ The following table describes the values required in the relevant `values.yaml`:
 |backups.s3stores[].userResource|The Kubernetes resource name of the MongoDB User for the metadata database replica set (must be created in advance)|
 |backups.s3stores[].s3secret|The Kubernetes Secert resource name that contains the access AWS access key and username|
 |backups.s3stores[].pathStyleEnabled|Boolean to determine of path style is used (true) or virtual-host-style (false) URL endpoint are used|
-|backups.s3stores[].bucketEndpoint||
-|backups.s3stores[].bucketName||
-|backups.appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
-|backups.appDB.mdbVersion||
-|backups.appDB.adminSecretName||
-|backups.appDB.tlsSecretName||
-|backups.appDB.CAConfigmapName||
-|backups.appDB.podLimitCPU||
-|backups.appDB.podLimitMemory||
-|backups.appDB.storageClass||
-|backups.appDB.storageSize||
+|backups.s3stores[].bucketEndpoint|The URL of the S3 bucket endpoint|
+|backups.s3stores[].bucketName|The name for the S3 bucket|
+|appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
+|appDB.mdbVersion|The version of MongoDB to use for the AppDB. Must match a tag in the `quay.io` registry|
+|appDB.adminSecretName|The name of the Kubernetes secret containing the admin user's password|
+|appDB.tlsSecretName|The name of the Kubernetes TLS secret containing the X.509 key and certificate for the AppDB|
+|appDB.CAConfigmapName|The Kubernetes configmap name containing the CA certificate for the TLS certificates|
+|appDB.podLimitCPU|The maximum memory that can be allocated to the AppDB database container|
+|appDB.podRequestsCPU|The initial CPUs allocated to the AppDB database container|
+|appDB.podLimitMemory|The maximum memory that can be allocated to the AppDB database container|
+|appDB.podRequestsMemory|The initial memory allocated to the AppDB database container|
+|appDB.initPodLimitCPU|The maximum memory that can be allocated to the AppDB init database container|
+|appDB.initPodRequestsCPU|The initial CPUs allocated to the AppDB init database container|
+|appDB.initPodLimitMemory|The maximum memory that can be allocated to the AppDB init database container|
+|appDB.initPodRequestsMemory|The initial memory allocated to the AppDB database init container|
+|appDB.storageClass|The Kubernetes StorageClass name that will be used for VPCs for the AppDB instances|
+|appDB.storageSize|The amount of storage to allocate for the AppDB mongod instances|
+
+### deploymentName
+
+The name that will be used for the Ops Manager instance. Must be unique in the namespace.
+
+### opsManager.omVersion
+
+The version of Ops Manager to use.
+
+### opsManager.replicas:
+
+The number of Ops Manager application servers to deploy. For high availability, this should be `2` or higher.
+
+### opsManager.adminUserSecret:
+
+The name of the Kubernetes secret that holds the credentials for the first user in Ops Manager.
+
+The secret must consist of the following keys:
+
+* Username
+* Password
+* FirstName
+* LastName
+
+See the prerequisites on [Ops Manager First User](#ops-manager-first-user-required) for further details.
+
+### opsManager.binarySource:
+
+Setting to determine if the MongoDB Automation Agents retrieve the mongod binaries from the Internet sources or from Ops Manager. The setting also determines if the Ops Manager retrieves the binaries from the Internet or is air-gapped.
+
+Options:
+* `remote` Automation Agent gets the binaries from MognoDB on the Internet
+* `hybrid` Automation Agent have no Internet access and will retieve the binaries from Ops Manager, but Ops Manager retrieves the binaries via the Internet
+* `remote` Automation Agent have no Internet access and will retieve the binaries from Ops Manager, but Ops Manager does *NOT* have Internet access and therefore the binaries are loaded onto the application servers (and backup daemons) manually. If this is selected also set `opsManager.localBinariesMountEnabled` to `true` so storage can be allocated for the binaries.
+
+### opsManager.tlsSecretName
+
+The name of the Kubernetes TLS secret that contains the TLS X.509 key and certificate for the Ops Manager application servers.
+
+The certificates need to include a SAN of the LoadBalancer or NodePort service if access is required from external to Kubernetes. See the prerequisites on [TLS Secret for Ops Manager Application Servers](#tls-secret-for-ops-manager-application-servers-highly-encouraged).
+
+### opsManager.emailServerHostname
+
+The Fully Qualified Domain Name (FQDN) of the email server for alerting and invitation purposes.
+
+### opsManager.adminEmailAddress
+
+The email address for the admin user of Ops Manager.
+
+### opsManager.fromEmailAddress
+
+The email address that will be used as the "from address" for emails sent by Ops Manager.
+
+### opsManager.replyEmailAddress:
+
+The email address used as the "reply address" for emails sent by Ops Manager.
+
+### opsManager.emailPort: 465
+### opsManager.emailSecure: true
+### opsManager.emailProtocol: smtp
+### opsManager.podLimitCPU: 4
+### opsManager.podRequestsCPU: 2
+### opsManager.podLimitMemory: 8Gi
+### opsManager.podRequestsMemory: 4Gi
+### opsManager.initPodLimitCPU: 2
+### opsManager.initPodRequestsCPU: 1
+### opsManager.initPodLimitMemory: 2Gi
+### opsManager.initPodRequestsMemory: 1G
+### opsManager.localBinariesMountEnabled
+### opsManager.extServiceEnabled: true
+### opsManager.extServiceType: NodePort
+### opsManager.extServicePort: 32111
+### opsManager.extCentralUrl: mongod3.mo
+
+backups:
+  enabled: false
+  members: 2
+  head:
+    binariesMountEnabled: f
+    binariesStorageClass: o
+    binariesStorageSize: 5G
+    storageClass: ops-manag
+    storageSize: 4Gi
+    podLimitCPU: 2
+    podRequestsCPU: 1
+    podLimitMemory: 2Gi
+    podRequestsMemory: 1Gi
+    initPodLimitCPU: 2
+    initPodRequestsCPU: 1
+    initPodLimitMemory: 2Gi
+    initPodRequestsMemory: 
+  oplogStores:
+    stores:
+      - name: oplog0
+        mdbResource: oplog0
+        userResource: oplog
+  blockstores:
+    stores:
+      - name: blockstore0
+        mdbResource: blocks
+        userResource: block
+  s3stores:
+
+appDB:
+  replicas: 3
+  mdbVersion: 5.0.1-ent
+  adminSecretName: om-db-us
+  tlsSecretName: ops-manage
+  CAConfigmapName: custom-c
+  podLimitCPU: 2
+  podRequestsCPU: 2
+  podLimitMemory: 2Gi
+  podRequestsMemory: 2Gi
+  storageClass: appsdb
+  storageSize: 10Gi 
 
 # Notes
 OM Admin user secret

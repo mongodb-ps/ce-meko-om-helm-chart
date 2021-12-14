@@ -30,7 +30,7 @@ opsManager:
   extCentralUrl: mongod3.mongodb.local:32111
 
 backups:
-  enabled: true
+  enabled: false
   members: 2
   head:
     binariesMountEnabled: false
@@ -65,6 +65,8 @@ appDB:
   tlsSecretName: ops-manager-db-cert
   CAConfigmapName: custom-ca
   podLimitCPU: 2
+  podRequestsCPU: 2
   podLimitMemory: 2Gi
+  podRequestsMemory: 2Gi
   storageClass: appsdb
   storageSize: 10Gi 

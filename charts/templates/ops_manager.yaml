@@ -83,8 +83,26 @@ spec:
         secretRef:
           name: {{ .Values.appDB.tlsSecretName }}
     podSpec:
-      cpu: {{ .Values.appDB.podLimitCPU | quote }}
-      memory: {{ .Values.appDB.podLimitMemory }}
+      podTemplate:
+        spec:
+          initContainers:
+            - name: mongodb-enterprise-init-appdb
+              resources:
+                limits:
+                  cpu: {{ .Values.appDB.initPodLimitCPU | quote }}
+                  memory: {{ .Values.appDB.initPodLimitMemory }}
+                requests:
+                  cpu: {{ .Values.appDB.initPodRequestsCPU | quote }}
+                  memory: {{ .Values.appDB.initPodRequestsMemory }}
+          containers:
+            - name: mongod
+              resources:
+                limits:
+                  cpu: {{ .Values.appDB.podLimitCPU | quote }}
+                  memory: {{ .Values.appDB.podLimitMemory }}
+                requests:
+                  cpu: {{ .Values.appDB.podRequestsCPU | quote }}
+                  memory: {{ .Values.appDB.podRequestsMemory }}
       persistence:
         single:
           storage: {{ .Values.appDB.storageSize }}
