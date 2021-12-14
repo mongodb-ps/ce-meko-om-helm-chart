@@ -17,7 +17,7 @@ spec:
             accessModes: [ "ReadWriteOnce" ]
             resources:
               requests:
-                storage: {{ .Vlaues.opsManager.localBinariesMountStorageSize }}
+                storage: {{ .Values.opsManager.localBinariesMountStorageSize }}
             storageClassName: {{ .Values.opsManager.localBinariesMountStorageClass }}
       template:
         spec:
