@@ -167,7 +167,7 @@ spec:
     {{- if .Values.backups.blockstores }}
     {{- if gt (len .Values.backups.blockstores.stores) 0  }}
     blockStores:
-    {{- range .Values.backups.blockstores.stores }}
+    {{- range .Values.backups.blockstores }}
       - name: {{ .name }}
         mongodbResourceRef:
           name: {{ .mdbResource }}
@@ -177,9 +177,9 @@ spec:
     {{- end }}
     {{- end }}
     {{- if .Values.backups.s3stores }}
-    {{- if gt (len .Values.backups.s3stores.stores) 0  }}
+    {{- if gt (len .Values.backups.s3stores) 0  }}
     s3Stores:
-    {{- range .Values.backups.s3stores.stores }}
+    {{- range .Values.backups.s3stores }}
       - name: {{ .name }}
         mongodbResourceRef:
           name: {{ .mdbResource }}
