@@ -14,6 +14,8 @@
     - [TLS Secrets for AppDB _HIGHLY ENCOURAGED_](#tls-secrets-for-appdb-highly-encouraged)
     - [Ops Manager First User _REQUIRED_](#ops-manager-first-user-required)
     - [MongoDB Admin User _REQUIRED_](#mongodb-admin-user-required)
+    - [Ops Manager Backup System](#ops-manager-backup-system)
+    - [S3 snapshot store](#s3-snapshot-store)
   - [Set Up](#set-up)
     - [deploymentName](#deploymentname)
     - [opsManager.omVersion](#opsmanageromversion)
@@ -207,6 +209,22 @@ kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret generic <name-of
   --from-literal=password=<password>
 ```
 
+### Ops Manager Backup System
+
+To enable the backup system within Ops Manager set the `backups.enabled` field to `true`. This will create a backup daemon, as well as a head database (which is no longer used in more modern MongoDB deployments). At least one of either a Blockstore or S3store must be selected as the snapshot store, and an oplog store is also required. The Blockstore and Oplog store are both MongoDB replica sets and need to be configured and deployed with the `k8s_mdb` Helm charts. This presents a chicken and egg situation, so Ops Manager should initially be deployed without backups enabled. The Blockstore(s) (if using Blockstores) and the Oplog store should be deployed, then the backup system should be enabled for Ops Manager. All options, including the Oplog store, require a MongoDB user that can be configured when deploying the actual MognoDB instance via the `k8s_mdb` Helm charts.
+
+### S3 snapshot store
+
+If the backup system is enabled, there is the choice to use S3-compatible devices as a snapshot store. This option requires another secret for the S3 credentials (accessKey and secretKey for the S3 endpoint).
+
+The secret can be created as follows:
+
+```shell
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret generic <name-of-secret> \
+  --from-literal=accessKey="<AKIAIOSFODNN7EXAMPLE>" \
+  --from-literal=secretKey="<wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY>"
+```
+
 ## Set Up
 
 Two environment variables are required, called ENV and NS (both case senstive). The first describes the selected Git environment for deployment and the second describes the Kubernetes namespace.
@@ -245,37 +263,6 @@ The following table describes the values required in the relevant `values.yaml`:
 |opsManager.extServiceType|The service type created for external access. Selection is `NodePort` or `LoadBalancer`|
 |opsManager.extServicePort|The Kubernetes port number to use for the NodePort, if `NodePort` is selected for `opsManager.extServiceType`|
 |opsManager.extCentralUrl|The URL, including port, that will be used by clients external to Kubernetes for the Ops Manager service|
-|backups.enabled|Boolean to determine if the backup system for Ops Manager is enabled|
-|backups.members|Number of backup daemons to create. One is normally enough|
-|backups.head.binariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
-|backups.head.binariesStorageClass|The Kubernetes StorageClass to be used for the binaries mount|
-|backups.head.binariesStorageSize|The size, including units, for the binaries mount|
-|backups.head.storageClass|The Kubernetes StorageClass for the Head database. Required if `backups.enabled` is `true`|
-|backups.head.storageSize|The size, including units, for the Head database storage|
-|backups.head.podLimitCPU|The maximum CPUs that can be allocated to the Head database container|
-|backups.head.podRequestsCPU|The initial CPUs allocated to the Head database container|
-|backups.head.podLimitMemory|The maximum memory that can be allocated to the Head database container|
-|backups.head.podRequestsMemory|The initial memory allocated to the Head database container|
-|backups.head.initPodLimitCPU|The maximum CPUs that can be allocated to the Head init container|
-|backups.head.initPodRequestsCPU|The initial CPUs allocated to the Head init container|
-|backups.head.initPodLimitMemory|The maximum memory that can be allocated to the Head init container|
-|backups.head.initPodRequestsMemory|The initial memory allocated to the Head init container|
-|backups.oplogStores.stores[]|An array of objects containing details on required Oplog Stores|
-|backups.oplogStores.stores[].name|The name to be used for the Oplog Store configuration within Ops Manager|
-|backups.oplogStores.stores[].mdbResource|The Kubernetes resource name of the Opolog Store MongoDB replica set (must be created in advance)|
-|backups.oplogStores.stores[].userResource|The Kubernetes resource name of the Opolog Store MongoDB User (must be created in advance)|
-|backups.blockstores.stores[]|An array of objects containing details on required Block Stores|
-|backups.blockstores.stores[].name|The name to be used for the Block Store configuration within Ops Manager|
-|backups.blockstores.stores[].mdbResource|The Kubernetes resource name of the Block Store MongoDB replica set (must be created in advance)|
-|backups.blockstores.stores[].userResource|The Kubernetes resource name of the Block Store MongoDB User (must be created in advance)|
-|backups.s3stores[]|An array if objects containing details of S3 stores for backups|
-|backups.s3stores[].name|The name given to the S3 store in Ops Manager|
-|backups.s3stores[].mdbResource|The Kubernetes resource name of the MongoDB replica set used for metadata (must be created in advance)|
-|backups.s3stores[].userResource|The Kubernetes resource name of the MongoDB User for the metadata database replica set (must be created in advance)|
-|backups.s3stores[].s3secret|The Kubernetes Secert resource name that contains the access AWS access key and username|
-|backups.s3stores[].pathStyleEnabled|Boolean to determine of path style is used (true) or virtual-host-style (false) URL endpoint are used|
-|backups.s3stores[].bucketEndpoint|The URL of the S3 bucket endpoint|
-|backups.s3stores[].bucketName|The name for the S3 bucket|
 |appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
 |appDB.mdbVersion|The version of MongoDB to use for the AppDB. Must match a tag in the `quay.io` registry|
 |appDB.adminSecretName|The name of the Kubernetes secret containing the admin user's password|
@@ -291,6 +278,37 @@ The following table describes the values required in the relevant `values.yaml`:
 |appDB.initPodRequestsMemory|The initial memory allocated to the AppDB database init container|
 |appDB.storageClass|The Kubernetes StorageClass name that will be used for VPCs for the AppDB instances|
 |appDB.storageSize|The amount of storage to allocate for the AppDB mongod instances|
+|backups.enabled|Boolean to determine if the backup system for Ops Manager is enabled|
+|backups.members|Number of backup daemons to create. One is normally enough|
+|backups.head.binariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
+|backups.head.binariesStorageClass|The Kubernetes StorageClass to be used for the binaries mount|
+|backups.head.binariesStorageSize|The size, including units, for the binaries mount|
+|backups.head.storageClass|The Kubernetes StorageClass for the Head database. Required if `backups.enabled` is `true`|
+|backups.head.storageSize|The size, including units, for the Head database storage|
+|backups.head.podLimitCPU|The maximum CPUs that can be allocated to the Head database container|
+|backups.head.podRequestsCPU|The initial CPUs allocated to the Head database container|
+|backups.head.podLimitMemory|The maximum memory that can be allocated to the Head database container|
+|backups.head.podRequestsMemory|The initial memory allocated to the Head database container|
+|backups.head.initPodLimitCPU|The maximum CPUs that can be allocated to the Head init container|
+|backups.head.initPodRequestsCPU|The initial CPUs allocated to the Head init container|
+|backups.head.initPodLimitMemory|The maximum memory that can be allocated to the Head init container|
+|backups.head.initPodRequestsMemory|The initial memory allocated to the Head init container|
+|backups.oplogStores[]|An array of objects containing details on required Oplog Stores|
+|backups.oplogStores[].name|The name to be used for the Oplog Store configuration within Ops Manager|
+|backups.oplogStores[].mdbResource|The Kubernetes resource name of the Opolog Store MongoDB replica set (must be created in advance)|
+|backups.oplogStores[].userResource|The Kubernetes resource name of the Opolog Store MongoDB User (must be created in advance)|
+|backups.blockstores[]|An array of objects containing details on required Block Stores|
+|backups.blockstores[].name|The name to be used for the Block Store configuration within Ops Manager|
+|backups.blockstores[].mdbResource|The Kubernetes resource name of the Block Store MongoDB replica set (must be created in advance)|
+|backups.blockstores[].userResource|The Kubernetes resource name of the Block Store MongoDB User (must be created in advance)|
+|backups.s3stores[]|An array if objects containing details of S3 stores for backups|
+|backups.s3stores[].name|The name given to the S3 store in Ops Manager|
+|backups.s3stores[].mdbResource|The Kubernetes resource name of the MongoDB replica set used for metadata (must be created in advance)|
+|backups.s3stores[].userResource|The Kubernetes resource name of the MongoDB User for the metadata database replica set (must be created in advance)|
+|backups.s3stores[].s3secret|The Kubernetes Secert resource name that contains the access AWS access key and username|
+|backups.s3stores[].pathStyleEnabled|Boolean to determine of path style is used (true) or virtual-host-style (false) URL endpoint are used|
+|backups.s3stores[].bucketEndpoint|The URL of the S3 bucket endpoint|
+|backups.s3stores[].bucketName|The name for the S3 bucket|
 
 ### deploymentName
 
