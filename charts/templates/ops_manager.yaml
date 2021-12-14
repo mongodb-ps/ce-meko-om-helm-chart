@@ -47,6 +47,8 @@ spec:
   configuration:
     {{- if .Values.opsManager.extServiceEnabled }}
     mms.centralUrl: {{ .Values.opsManager.extCentralUrl }}
+    {{- else }}
+    mms.centralUrl: {{ .Values.deploymentName }}-svc.{{ .Release.Namespace }}.svc.cluster.local
     {{- end }}
     mms.ignoreInitialUiSetup: "true"
     automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
