@@ -19,7 +19,7 @@
     - [opsManager.omVersion](#opsmanageromversion)
     - [opsManager.replicas:](#opsmanagerreplicas)
     - [opsManager.adminUserSecret:](#opsmanageradminusersecret)
-    - [opsManager.binarySource:](#opsmanagerbinarysource)
+    - [opsManager.binarySource](#opsmanagerbinarysource)
     - [opsManager.tlsSecretName](#opsmanagertlssecretname)
     - [opsManager.emailServerHostname](#opsmanageremailserverhostname)
     - [opsManager.adminEmailAddress](#opsmanageradminemailaddress)
@@ -58,6 +58,30 @@
     - [appDB.initPodRequestsMemory](#appdbinitpodrequestsmemory)
     - [appDB.storageClass](#appdbstorageclass)
     - [appDB.storageSize](#appdbstoragesize)
+    - [backups.enabled](#backupsenabled)
+    - [backups.members](#backupsmembers)
+    - [backups.head.binariesMountEnabled](#backupsheadbinariesmountenabled)
+    - [backups.head.binariesStorageClass](#backupsheadbinariesstorageclass)
+    - [backups.head.binariesStorageSize](#backupsheadbinariesstoragesize)
+    - [backups.head.storageClass](#backupsheadstorageclass)
+    - [backups.head.storageSize](#backupsheadstoragesize)
+    - [backups.head.podLimitCPU](#backupsheadpodlimitcpu)
+    - [backups.head.podRequestsCPU](#backupsheadpodrequestscpu)
+    - [backups.head.podLimitMemory](#backupsheadpodlimitmemory)
+    - [backups.head.podRequestsMemory](#backupsheadpodrequestsmemory)
+    - [backups.head.initPodLimitCPU](#backupsheadinitpodlimitcpu)
+    - [backups.head.initPodRequestsCPU](#backupsheadinitpodrequestscpu)
+    - [backups.head.initPodLimitMemory](#backupsheadinitpodlimitmemory)
+    - [backups.head.initPodRequestsMemory](#backupsheadinitpodrequestsmemory)
+    - [backups.oplogStores[]](#backupsoplogstores)
+    - [backups.oplogStores.name](#backupsoplogstoresname)
+    - [backups.oplogStores.mdbResource](#backupsoplogstoresmdbresource)
+    - [backups.oplogStores.userResource](#backupsoplogstoresuserresource)
+    - [backups.blockstores[]](#backupsblockstores)
+    - [backups.blockstores[].name](#backupsblockstoresname)
+    - [backups.blockstores[].mdbResource](#backupsblockstoresmdbresource)
+    - [backups.blockstores[].userResource: block](#backupsblockstoresuserresource-block)
+    - [backups.s3stores:](#backupss3stores)
   - [Run](#run)
 
 ## Description
@@ -286,7 +310,7 @@ The secret must consist of the following keys:
 
 See the prerequisites on [Ops Manager First User](#ops-manager-first-user-required) for further details.
 
-### opsManager.binarySource:
+### opsManager.binarySource
 
 Setting to determine if the MongoDB Automation Agents retrieve the mongod binaries from the Internet sources or from Ops Manager. The setting also determines if the Ops Manager retrieves the binaries from the Internet or is air-gapped.
 
@@ -461,41 +485,110 @@ The name of the Kubernetes StorageClass that will be used for persistent storage
 
 ### appDB.storageSize
 
-The size of the storage that will be allocated to the pods from the `appDB.stroageClass`. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+The size of the storage that will be allocated to the pods from the `appDB.storageClass`. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
 
+### backups.enabled
 
+A boolean value to determine if the Ops Manager backup system is enable and deployed.
 
+### backups.members
 
+The number of backup daemons to deploy. As of Ops Manager 4.2 the Backup Daemon really only does cleaning/pruning of backups and is responsible for queryable backups.
 
-[WIP]
-backups:
-  enabled: false
-  members: 2
-  head:
-    binariesMountEnabled: f
-    binariesStorageClass: o
-    binariesStorageSize: 5G
-    storageClass: ops-manag
-    storageSize: 4Gi
-    podLimitCPU: 2
-    podRequestsCPU: 1
-    podLimitMemory: 2Gi
-    podRequestsMemory: 1Gi
-    initPodLimitCPU: 2
-    initPodRequestsCPU: 1
-    initPodLimitMemory: 2Gi
-    initPodRequestsMemory: 
-  oplogStores:
-    stores:
-      - name: oplog0
-        mdbResource: oplog0
-        userResource: oplog
-  blockstores:
-    stores:
-      - name: blockstore0
-        mdbResource: blocks
-        userResource: block
-  s3stores:
+Required if `backups.enabled` is `true`. 
+
+### backups.head.binariesMountEnabled
+
+If `opsManager.binarySource` is set to `local` then this also should be true so the MongoDB binaries for the head database have a storage location.
+
+### backups.head.binariesStorageClass
+
+The name of the Kubernetes StorageClass that will be used to create the PVC for the local binaries store.
+
+Required only if `backups.head.binariesMountEnabled` is true.
+
+### backups.head.binariesStorageSize
+
+The size of the storage to allocate for the MongoDB binaries.
+
+Required only if `opsManager.binarySource` is set to `local`.
+
+### backups.head.storageClass
+
+The name of the Kubernetes StorageClass that will be used to create the PVC for the head database. As of Ops Manager 4.2 backing up MongoDB 4.2 with FCV of 4.2 this is of limited value.
+
+Is this is absent the default StorageClass will be used if configured in Kubernetes.
+
+### backups.head.storageSize
+
+The size of the storage to allocate for the head database.
+
+Required if `backups.enabled` is `true`. 
+
+### backups.head.podLimitCPU
+
+The CPU limit that can be assigned to each head pod.
+
+### backups.head.podRequestsCPU
+
+The initial CPUs assigned to each head pod.
+
+### backups.head.podLimitMemory
+
+The maximum memory that can be assigned to each head pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### backups.head.podRequestsMemory
+
+The initial memory assigned to each head pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### backups.head.initPodLimitCPU
+
+The CPU limit that can be assigned to each head init pod.
+
+### backups.head.initPodRequestsCPU
+
+The initial CPUs assigned to each head init pod.
+
+### backups.head.initPodLimitMemory
+
+The maximum memory that can be assigned to each head init pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### backups.head.initPodRequestsMemory
+
+The initial memory assigned to each head init pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### backups.oplogStores[]
+
+An array of Oplog store resources.
+
+### backups.oplogStores.name
+
+The name that will be configured for the Oplog resource.
+
+### backups.oplogStores.mdbResource
+
+The name of the Kubernetes MongoDB resource that is selected as this particular Oplog Store.
+
+### backups.oplogStores.userResource
+
+The name of the Kubernetes MongoDB User resource that has the required privileges to be the backup user for the MongoDB resource.
+
+### backups.blockstores[]
+
+An array of Blockstore resources.
+
+This or s3stores is required if `backups.enabled` is `true`.
+
+### backups.blockstores[].name
+
+The name that will be configured for the Blockstore resource.
+
+### backups.blockstores[].mdbResource
+
+The name of the Kubernetes MongoDB resource that is selected as this particular Blockstore.
+
+### backups.blockstores[].userResource: block
+### backups.s3stores:
 
 ## Run
 
