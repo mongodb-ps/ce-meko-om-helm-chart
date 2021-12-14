@@ -41,8 +41,8 @@
     - [opsManager.localBinariesMountStorageSize](#opsmanagerlocalbinariesmountstoragesize)
     - [opsManager.extServiceEnabled](#opsmanagerextserviceenabled)
     - [opsManager.extServiceType](#opsmanagerextservicetype)
+    - [opsManager.centralUrl](#opsmanagercentralurl)
     - [opsManager.extServicePort](#opsmanagerextserviceport)
-    - [opsManager.extCentralUrl](#opsmanagerextcentralurl)
     - [appDB.replicas](#appdbreplicas)
     - [appDB.mdbVersion](#appdbmdbversion)
     - [appDB.adminSecretName](#appdbadminsecretname)
@@ -416,17 +416,17 @@ Kubernetes [documentation](https://kubernetes.io/docs/concepts/services-networki
 
 Only required if `opsManager.extServiceEnabled` is set to `true`.
 
+### opsManager.centralUrl
+
+The protocol, FQDN and port number that will be used by clients to gain access to Ops Manager. This can be a CNAME that resolves to a work node or the load balancer (depends on the selection for `opsManager.extServiceType`)
+
+If not provided the default is `https://<deploymentName>-svc.<namespace>.svc.cluster.local`
+
 ### opsManager.extServicePort
 
 The worker node port to use for external access if `NodePort` is selected for `opsManager.extServiceType`. This port must be unique wthin the whole Kubernetes cluster and not in use. Ports normally start from 30000.
 
 Only required if `opsManager.extServiceType` is set to `NodePort`
-
-### opsManager.extCentralUrl
-
-The FQDN that will be used by external clients to gain access to Ops Manager. This can be a CNAME that resolves to a work node or the load balancer (depends on the selection for `opsManager.extServiceType`)
-
-Only required if `opsManager.extServiceType` is set to `true`.
 
 ### appDB.replicas
 

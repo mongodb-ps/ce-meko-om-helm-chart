@@ -45,10 +45,10 @@ spec:
                 cpu: {{ .Values.opsManager.initPodRequestsCPU | quote }}
                 memory: {{ .Values.opsManager.initPodRequestsMemory }}
   configuration:
-    {{- if .Values.opsManager.extServiceEnabled }}
-    mms.centralUrl: {{ .Values.opsManager.extCentralUrl }}
+    {{- if .Values.opsManager.centralUrl }}
+    mms.centralUrl: {{ .Values.opsManager.centralUrl }}
     {{- else }}
-    mms.centralUrl: {{ .Values.deploymentName }}-svc.{{ .Release.Namespace }}.svc.cluster.local
+    mms.centralUrl: https://{{ .Values.deploymentName }}-svc.{{ .Release.Namespace }}.svc.cluster.local:8443
     {{- end }}
     mms.ignoreInitialUiSetup: "true"
     automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
