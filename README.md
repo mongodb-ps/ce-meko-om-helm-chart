@@ -40,9 +40,9 @@
     - [opsManager.localBinariesMountStorageClass](#opsmanagerlocalbinariesmountstorageclass)
     - [opsManager.localBinariesMountStorageSize](#opsmanagerlocalbinariesmountstoragesize)
     - [opsManager.extServiceEnabled](#opsmanagerextserviceenabled)
-    - [opsManager.extServiceType: NodePort](#opsmanagerextservicetype-nodeport)
-    - [opsManager.extServicePort: 32111](#opsmanagerextserviceport-32111)
-    - [opsManager.extCentralUrl: mongod3.mo](#opsmanagerextcentralurl-mongod3mo)
+    - [opsManager.extServiceType](#opsmanagerextservicetype)
+    - [opsManager.extServicePort](#opsmanagerextserviceport)
+    - [opsManager.extCentralUrl](#opsmanagerextcentralurl)
     - [appDB.replicas: 3](#appdbreplicas-3)
     - [appDB.mdbVersion: 5.0.1-ent](#appdbmdbversion-501-ent)
     - [appDB.adminSecretName: om-db-us](#appdbadminsecretname-om-db-us)
@@ -380,9 +380,28 @@ The name of the Kubernetes StorageClass that will be used to create the PVC to s
 The size of the storage required for the MongoDB binaries, if needed. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
 
 ### opsManager.extServiceEnabled
-### opsManager.extServiceType: NodePort
-### opsManager.extServicePort: 32111
-### opsManager.extCentralUrl: mongod3.mo
+
+A boolean value to determine if access to Ops Manager is required from external to Kubernetes (this includes other Kubernetes clusters).
+
+### opsManager.extServiceType
+
+The type of Kuberentes Service to create for the external access. Can be `NodePort` or `LoadBlaancer`.
+
+Kubernetes [documentation](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) should be consulted on the best method for the environment.
+
+Only required if `opsManager.extServiceEnabled` is set to `true`.
+
+### opsManager.extServicePort
+
+The worker node port to use for external access if `NodePort` is selected for `opsManager.extServiceType`. This port must be unique wthin the whole Kubernetes cluster and not in use. Ports normally start from 30000.
+
+Only required if `opsManager.extServiceType` is set to `NodePort`
+
+### opsManager.extCentralUrl
+
+The FQDN that will be used by external clients to gain access to Ops Manager. This can be a CNAME that resolves to a work node or the load balancer (depends on the selection for `opsManager.extServiceType`)
+
+Only required if `opsManager.extServiceType` is set to `true`.
 
 ### appDB.replicas: 3
 ### appDB.mdbVersion: 5.0.1-ent
