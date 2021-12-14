@@ -83,7 +83,7 @@
     - [backups.blockstores[].name](#backupsblockstoresname)
     - [backups.blockstores[].mdbResource](#backupsblockstoresmdbresource)
     - [backups.blockstores[].userResource](#backupsblockstoresuserresource)
-    - [backups.s3stores[]:](#backupss3stores)
+    - [backups.s3stores[]](#backupss3stores)
     - [backups.s3stores[].name](#backupss3storesname)
     - [backups.s3stores[].mdbResource](#backupss3storesmdbresource)
     - [backups.s3stores[].userResource](#backupss3storesuserresource)
@@ -616,7 +616,7 @@ The name of the Kubernetes MongoDB resource that is selected as this particular 
 
 The name of the Kubernetes MongoDB User resource that has the required privileges to be the backup user for the MongoDB resource.
 
-### backups.s3stores[]:
+### backups.s3stores[]
 
 An array of S3 resources for snapshots.
 
