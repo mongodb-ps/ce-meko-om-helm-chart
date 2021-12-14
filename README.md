@@ -24,24 +24,37 @@
     - [opsManager.emailServerHostname](#opsmanageremailserverhostname)
     - [opsManager.adminEmailAddress](#opsmanageradminemailaddress)
     - [opsManager.fromEmailAddress](#opsmanagerfromemailaddress)
-    - [opsManager.replyEmailAddress:](#opsmanagerreplyemailaddress)
-    - [opsManager.emailPort: 465](#opsmanageremailport-465)
-    - [opsManager.emailSecure: true](#opsmanageremailsecure-true)
-    - [opsManager.emailProtocol: smtp](#opsmanageremailprotocol-smtp)
-    - [opsManager.podLimitCPU: 4](#opsmanagerpodlimitcpu-4)
-    - [opsManager.podRequestsCPU: 2](#opsmanagerpodrequestscpu-2)
-    - [opsManager.podLimitMemory: 8Gi](#opsmanagerpodlimitmemory-8gi)
-    - [opsManager.podRequestsMemory: 4Gi](#opsmanagerpodrequestsmemory-4gi)
-    - [opsManager.initPodLimitCPU: 2](#opsmanagerinitpodlimitcpu-2)
-    - [opsManager.initPodRequestsCPU: 1](#opsmanagerinitpodrequestscpu-1)
-    - [opsManager.initPodLimitMemory: 2Gi](#opsmanagerinitpodlimitmemory-2gi)
-    - [opsManager.initPodRequestsMemory: 1G](#opsmanagerinitpodrequestsmemory-1g)
+    - [opsManager.replyEmailAddress](#opsmanagerreplyemailaddress)
+    - [opsManager.emailPort](#opsmanageremailport)
+    - [opsManager.emailSecure](#opsmanageremailsecure)
+    - [opsManager.emailProtocol](#opsmanageremailprotocol)
+    - [opsManager.podLimitCPU](#opsmanagerpodlimitcpu)
+    - [opsManager.podRequestsCPU](#opsmanagerpodrequestscpu)
+    - [opsManager.podLimitMemory](#opsmanagerpodlimitmemory)
+    - [opsManager.podRequestsMemory](#opsmanagerpodrequestsmemory)
+    - [opsManager.initPodLimitCPU](#opsmanagerinitpodlimitcpu)
+    - [opsManager.initPodRequestsCPU](#opsmanagerinitpodrequestscpu)
+    - [opsManager.initPodLimitMemory](#opsmanagerinitpodlimitmemory)
+    - [opsManager.initPodRequestsMemory](#opsmanagerinitpodrequestsmemory)
     - [opsManager.localBinariesMountEnabled](#opsmanagerlocalbinariesmountenabled)
-    - [opsManager.extServiceEnabled: true](#opsmanagerextserviceenabled-true)
+    - [opsManager.localBinariesMountStorageClass](#opsmanagerlocalbinariesmountstorageclass)
+    - [opsManager.localBinariesMountStorageSize](#opsmanagerlocalbinariesmountstoragesize)
+    - [opsManager.extServiceEnabled](#opsmanagerextserviceenabled)
     - [opsManager.extServiceType: NodePort](#opsmanagerextservicetype-nodeport)
     - [opsManager.extServicePort: 32111](#opsmanagerextserviceport-32111)
     - [opsManager.extCentralUrl: mongod3.mo](#opsmanagerextcentralurl-mongod3mo)
-- [Notes](#notes)
+    - [appDB.replicas: 3](#appdbreplicas-3)
+    - [appDB.mdbVersion: 5.0.1-ent](#appdbmdbversion-501-ent)
+    - [appDB.adminSecretName: om-db-us](#appdbadminsecretname-om-db-us)
+    - [appDB.tlsSecretName: ops-manage](#appdbtlssecretname-ops-manage)
+    - [appDB.CAConfigmapName: custom-c](#appdbcaconfigmapname-custom-c)
+    - [appDB.podLimitCPU: 2](#appdbpodlimitcpu-2)
+    - [appDB.podRequestsCPU: 2](#appdbpodrequestscpu-2)
+    - [appDB.podLimitMemory: 2Gi](#appdbpodlimitmemory-2gi)
+    - [appDB.podRequestsMemory: 2Gi](#appdbpodrequestsmemory-2gi)
+    - [appDB.storageClass: appsdb](#appdbstorageclass-appsdb)
+    - [appDB.storageSize: 10Gi](#appdbstoragesize-10gi)
+  - [Run](#run)
 
 ## Description
 
@@ -201,6 +214,8 @@ The following table describes the values required in the relevant `values.yaml`:
 |opsManager.initPodLimitMemory|The maximum memory that can be allocated to the Ops Manager init container|
 |opsManager.initPodRequestsMemory|The initial memory allocated to the Ops Manager init container|
 |opsManager.localBinariesMountEnabled|Boolean to determine if a PVC is created to store the MongoDB binaries. Required if `opsManager.binarySource` is `local`|
+|opsManager.localBinariesMountStorageClass|The name of the Kubernetes StorageClass that will be used as the local storage for MongoDB binaries, if required|
+|opsManager.localBinariesMountStorageSize|The size of the storage to be allocated for the binaries if required|
 |opsManager.extServiceEnabled|Boolean to determine if access to Ops Manager from clients/users external to Kubernetes is required|
 |opsManager.extServiceType|The service type created for external access. Selection is `NodePort` or `LoadBalancer`|
 |opsManager.extServicePort|The Kubernetes port number to use for the NodePort, if `NodePort` is selected for `opsManager.extServiceType`|
@@ -304,26 +319,85 @@ The email address for the admin user of Ops Manager.
 
 The email address that will be used as the "from address" for emails sent by Ops Manager.
 
-### opsManager.replyEmailAddress:
+### opsManager.replyEmailAddress
 
 The email address used as the "reply address" for emails sent by Ops Manager.
 
-### opsManager.emailPort: 465
-### opsManager.emailSecure: true
-### opsManager.emailProtocol: smtp
-### opsManager.podLimitCPU: 4
-### opsManager.podRequestsCPU: 2
-### opsManager.podLimitMemory: 8Gi
-### opsManager.podRequestsMemory: 4Gi
-### opsManager.initPodLimitCPU: 2
-### opsManager.initPodRequestsCPU: 1
-### opsManager.initPodLimitMemory: 2Gi
-### opsManager.initPodRequestsMemory: 1G
+### opsManager.emailPort
+
+The port, as an integer, that the email server uses for communications.
+
+### opsManager.emailSecure
+
+A boolean value to determine if TLS is used with email communications.
+
+### opsManager.emailProtocol
+
+The protocol to use with the email server. Choices are `smtp` or `smtps`.
+
+### opsManager.podLimitCPU
+
+The CPU limit that can be assigned to each Ops Manager Application Server pod.
+
+### opsManager.podRequestsCPU
+
+The initial CPUs assigned to each Ops Manager Application Server pod.
+
+### opsManager.podLimitMemory
+
+The maximum memory that can be assigned to each Ops Manager Application Server pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### opsManager.podRequestsMemory
+
+The initial memory assigned to each Ops Manager Application Server pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### opsManager.initPodLimitCPU
+
+The CPU limit that can be assigned to each Ops Manager Application Server init pod.
+
+### opsManager.initPodRequestsCPU
+
+The initial CPUs assigned to each Ops Manager Application Server init pod.
+
+### opsManager.initPodLimitMemory
+
+The maximum memory that can be assigned to each Ops Manager Application Server init pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### opsManager.initPodRequestsMemory
+
+The initial memory assigned to each Ops Manager Application Server init pod. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
 ### opsManager.localBinariesMountEnabled
-### opsManager.extServiceEnabled: true
+
+A bollean to determine if a VPC is created for the MongoDB binaries. This is requried when `opsManager.binarySource` is `local` mode.
+
+### opsManager.localBinariesMountStorageClass
+
+The name of the Kubernetes StorageClass that will be used to create the PVC to storage the MongoDB binaries, ir required.
+
+### opsManager.localBinariesMountStorageSize
+
+The size of the storage required for the MongoDB binaries, if needed. The units suffix can be one of the following: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.
+
+### opsManager.extServiceEnabled
 ### opsManager.extServiceType: NodePort
 ### opsManager.extServicePort: 32111
 ### opsManager.extCentralUrl: mongod3.mo
+
+### appDB.replicas: 3
+### appDB.mdbVersion: 5.0.1-ent
+### appDB.adminSecretName: om-db-us
+### appDB.tlsSecretName: ops-manage
+### appDB.CAConfigmapName: custom-c
+### appDB.podLimitCPU: 2
+### appDB.podRequestsCPU: 2
+### appDB.podLimitMemory: 2Gi
+### appDB.podRequestsMemory: 2Gi
+### appDB.storageClass: appsdb
+### appDB.storageSize: 10Gi 
+
+
+
 
 backups:
   enabled: false
@@ -354,20 +428,23 @@ backups:
         userResource: block
   s3stores:
 
-appDB:
-  replicas: 3
-  mdbVersion: 5.0.1-ent
-  adminSecretName: om-db-us
-  tlsSecretName: ops-manage
-  CAConfigmapName: custom-c
-  podLimitCPU: 2
-  podRequestsCPU: 2
-  podLimitMemory: 2Gi
-  podRequestsMemory: 2Gi
-  storageClass: appsdb
-  storageSize: 10Gi 
+## Run
 
-# Notes
-OM Admin user secret
-OM TLS secret
-APPDB TLS secret
+To use the Helm charts via helmfile perform the following:
+
+```shell
+ENV=dev NS=mongodb KUBECONFIG=$PWD/kubeconfig helmfile apply
+```
+
+The `kubeconfig` is the config file to gain access to the Kubernetes cluster. The `ENV=dev` is the environment to use for the `values.yaml`, in this case an environment called `dev`.
+
+To see what the actual YAML files will look like without applying them to Kubernetes use:
+
+```shell
+ENV=dev helmfile template
+```
+
+To destroy the environment (the PersistentVolumes will remain) use the following command:
+
+```shell
+ENV=dev NS=mongodb KUBECONFIG=$PWD/kubeconfig helmfile destroy

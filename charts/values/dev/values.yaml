@@ -24,10 +24,25 @@ opsManager:
   initPodLimitMemory: 2Gi
   initPodRequestsMemory: 1Gi
   localBinariesMountEnabled: false
+  localBinariesMountStorageClass: mongodb-binaries
+  localBinariesMountStorageSize: 5Gi
   extServiceEnabled: true
   extServiceType: NodePort
   extServicePort: 32111
   extCentralUrl: mongod3.mongodb.local:32111
+
+appDB:
+  replicas: 3
+  mdbVersion: 5.0.1-ent
+  adminSecretName: om-db-user
+  tlsSecretName: ops-manager-db-cert
+  CAConfigmapName: custom-ca
+  podLimitCPU: 2
+  podRequestsCPU: 2
+  podLimitMemory: 2Gi
+  podRequestsMemory: 2Gi
+  storageClass: appsdb
+  storageSize: 10Gi 
 
 backups:
   enabled: false
@@ -57,16 +72,3 @@ backups:
         mdbResource: blockstore0
         userResource: blockstore0-om-user
   s3stores:
-
-appDB:
-  replicas: 3
-  mdbVersion: 5.0.1-ent
-  adminSecretName: om-db-user
-  tlsSecretName: ops-manager-db-cert
-  CAConfigmapName: custom-ca
-  podLimitCPU: 2
-  podRequestsCPU: 2
-  podLimitMemory: 2Gi
-  podRequestsMemory: 2Gi
-  storageClass: appsdb
-  storageSize: 10Gi 

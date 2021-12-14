@@ -17,8 +17,8 @@ spec:
             accessModes: [ "ReadWriteOnce" ]
             resources:
               requests:
-                storage: 5Gi
-            storageClassName: ops-manager-binaries
+                storage: {{ .Vlaues.opsManager.localBinariesMountStorageSize }}
+            storageClassName: {{ .Values.opsManager.localBinariesMountStorageClass }}
       template:
         spec:
           containers:
