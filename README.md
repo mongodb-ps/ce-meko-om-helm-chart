@@ -86,8 +86,9 @@
     - [backups.s3stores[].mdbResource](#backupss3storesmdbresource)
     - [backups.s3stores[].userResource](#backupss3storesuserresource)
     - [backups.s3stores[].s3secret](#backupss3storess3secret)
-    - [backups.s3stores[].](#backupss3stores-1)
-    - [backups.s3stores[].](#backupss3stores-2)
+    - [backups.s3stores[].pathStyleEnabled](#backupss3storespathstyleenabled)
+    - [backups.s3stores[].bucketEndpoint](#backupss3storesbucketendpoint)
+    - [backups.s3stores[].bucketName](#backupss3storesbucketname)
   - [Run](#run)
 
 ## Description
@@ -617,8 +618,17 @@ The name of the Kubernetes MongoDB User resource that has the required privilege
 
 The name of the Kubernetes secret that contains the various AWS keys and usernames for the S3 device.
 
-### backups.s3stores[].
-### backups.s3stores[].
+### backups.s3stores[].pathStyleEnabled
+
+A boolean determining if path style URL are used (if `true`) or virtual-host-style URL are used (if `false`).
+
+### backups.s3stores[].bucketEndpoint
+
+The URL of the S3 endpoint.
+
+### backups.s3stores[].bucketName
+
+Name of the S3 bucket that will host the snapshots.
 
 ## Run
 
