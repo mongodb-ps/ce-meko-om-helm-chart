@@ -78,7 +78,7 @@ spec:
     members: {{ .Values.appDB.replicas }}
     version: {{ .Values.appDB.mdbVersion }}
     passwordSecretKeyRef:
-      name: {{ .Values.appDB.adminSecretName }} 
+      name: {{ .Values.appDB.mongoDBAdminPasswdSecretName }} 
     security:
       tls:
         ca: {{ .Values.appDB.CAConfigmapName  }}

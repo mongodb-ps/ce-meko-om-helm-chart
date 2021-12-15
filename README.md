@@ -47,7 +47,7 @@
     - [opsManager.extServicePort](#opsmanagerextserviceport)
     - [appDB.replicas](#appdbreplicas)
     - [appDB.mdbVersion](#appdbmdbversion)
-    - [appDB.adminSecretName](#appdbadminsecretname)
+    - [appDB.mongoDBAdminPasswdSecretName](#appdbmongoDBAdminPasswdSecretname)
     - [appDB.tlsSecretName](#appdbtlssecretname)
     - [appDB.CAConfigmapName](#appdbcaconfigmapname)
     - [appDB.podLimitCPU](#appdbpodlimitcpu)
@@ -200,7 +200,7 @@ kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret generic <adminus
 
 ### MongoDB Admin User _REQUIRED_
 
-A secret must exist for the admin user of the AppDB. The name of the secret must be set in the releveant `values.yaml` as `adminSecretName` value. The secret must contain a key called `password` that contains the password for the user. The username is set to `mongodb-ops-manager` by the Kubernetes Operator.
+A secret must exist for the admin user of the AppDB. The name of the secret must be set in the releveant `values.yaml` as `mongoDBAdminPasswdSecretName` value. The secret must contain a key called `password` that contains the password for the user. The username is set to `mongodb-ops-manager` by the Kubernetes Operator.
 
 The secret can be create via `kubectl` as follows:
 
@@ -265,7 +265,7 @@ The following table describes the values required in the relevant `values.yaml`:
 |opsManager.extCentralUrl|The URL, including port, that will be used by clients external to Kubernetes for the Ops Manager service|
 |appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
 |appDB.mdbVersion|The version of MongoDB to use for the AppDB. Must match a tag in the `quay.io` registry|
-|appDB.adminSecretName|The name of the Kubernetes secret containing the admin user's password|
+|appDB.mongoDBAdminPasswdSecretName|The name of the Kubernetes secret containing the admin user's password|
 |appDB.tlsSecretName|The name of the Kubernetes TLS secret containing the X.509 key and certificate for the AppDB|
 |appDB.CAConfigmapName|The Kubernetes configmap name containing the CA certificate for the TLS certificates|
 |appDB.podLimitCPU|The maximum memory that can be allocated to the AppDB database container|
@@ -454,7 +454,7 @@ Number of replica members to create in the AppDB replica set, this should be at 
 
 The MongoDB version that will be deployed as the AppDB. This must aligned with a tag in the quay.io repository for [mongodb-enterprise-appdb-database](https://quay.io/repository/mongodb/mongodb-enterprise-appdb-database?tab=tags).
 
-### appDB.adminSecretName
+### appDB.mongoDBAdminPasswdSecretName
 
 The name of the Kubernetes Secret for the MongoDB admin user (mongodb-ops-manager) for the AppDB. The key within th esecret must be called `password`. 
 

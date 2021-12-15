@@ -34,7 +34,7 @@ opsManager:
 appDB:
   replicas: 3
   mdbVersion: 5.0.1-ent
-  adminSecretName: om-db-user
+  mongoDBAdminPasswdSecretName: om-db-user
   tlsSecretName: ops-manager-db-cert
   CAConfigmapName: custom-ca
   podLimitCPU: 2
@@ -62,13 +62,11 @@ backups:
     initPodLimitMemory: 2Gi
     initPodRequestsMemory: 1Gi
   oplogStores:
-    stores:
-      - name: oplog0
-        mdbResource: oplog0
-        userResource: oplog0-om-user
+    - name: oplog0
+      mdbResource: oplog0
+      userResource: oplog0-om-user
   blockstores:
-    stores:
-      - name: blockstore0
-        mdbResource: blockstore0
-        userResource: blockstore0-om-user
+    - name: blockstore0
+      mdbResource: blockstore0
+      userResource: blockstore0-om-user
   s3stores:
