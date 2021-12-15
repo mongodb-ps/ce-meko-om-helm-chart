@@ -668,3 +668,4 @@ To destroy the environment (the PersistentVolumes will remain) use the following
 
 ```shell
 ENV=dev NS=mongodb KUBECONFIG=$PWD/kubeconfig helmfile destroy
+```
