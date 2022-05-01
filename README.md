@@ -5,6 +5,7 @@
 ## Table of Contents
 - [k8s_om](#k8s_om)
   - [Table of Contents](#table-of-contents)
+  - [Compatability](#compatability)
   - [Description](#description)
   - [Steps to Deploy](#steps-to-deploy)
   - [Prerequisites](#prerequisites)
@@ -18,6 +19,7 @@
     - [S3 snapshot store](#s3-snapshot-store)
   - [Set Up](#set-up)
     - [deploymentName](#deploymentname)
+    - [tls.enabled](#tlsenabled)
     - [opsManager.omVersion](#opsmanageromversion)
     - [opsManager.replicas:](#opsmanagerreplicas)
     - [opsManager.adminUserSecret:](#opsmanageradminusersecret)
@@ -93,6 +95,17 @@
     - [backups.s3stores[].bucketName](#backupss3storesbucketname)
   - [Run](#run)
 
+## Compatability
+
+This version of the Helm charts has been tested with MongoDB Kubernetes Operator version(s):
+* 1.16.0
+
+The following MongoDB versions have been tested functional as the AppDB:
+* 5.0.5-ent
+
+The following Ops Manager were tested successfully:
+* 5.0.9
+
 ## Description
 
 A series of Helm Charts to deploy MongoDB Ops Manager within Kubernetes with the MongoDB Kubernetes Operator.
@@ -137,12 +150,16 @@ This requires one Kubernetes TLS secret.
 
 The secrets contain the X.509 key and certificate. A Subject Alternate Name (SAN) entry must exist for the service.
 
-The certificate must include the name of FQDN external to Kubernetes as a Subject Alternate Name (SAN) if external access is required. 
+The certificate must include the name of FQDN external to Kubernetes as a Subject Alternate Name (SAN) if external access is required.
+
+The secret must be named as follows:
+
+**om-\<deploymentName\>-cert**
 
 The secret can be created as follows:
 
 ```shell
-kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <deploymentName>-cert \
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls om-<deploymentName>-cert \
   --cert=<path-to-cert> \
   --key=<path-to-key>
 ```
@@ -176,12 +193,12 @@ Where `<deploymentName>` is the `deploymentName` in the `values.yaml` for your d
 
 The secret must be named as follows:
 
-**\<deploymentName\>-appdb-\<cert\>**
+**appdb-\<deploymentName\>-db-cert**
 
 The secret can be created as follows:
 
 ```shell
-kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls <deploymentName>-appdb-cert \
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create secret tls appdb-<deploymentName>-db-cert \
   --cert=<path-to-cert> \
   --key=<path-to-key>
 ```
@@ -236,6 +253,7 @@ The following table describes the values required in the relevant `values.yaml`:
 |Key|Purpose|
 |--------------------------|------------------------------------|
 |deploymentName|The name for the Ops Manager deployment (becomes the Kubernetes resource name)|
+|tls.enabled|Boolean value to determine if TLS is enabled for Ops Manager and AppDB, default is `true`|
 |opsManager.omVersion|Version of Ops Manager to use|
 |opsManager.replicas|Number of Ops Manager application servers to deploy|
 |opsManager.adminUserSecret|The name of the Kubernetes secret containing the first user's password for Ops Manager|
@@ -313,6 +331,12 @@ The following table describes the values required in the relevant `values.yaml`:
 ### deploymentName
 
 The name that will be used for the Ops Manager instance. Must be unique in the namespace.
+
+### tls.enabled
+
+Boolean to determine if TLS is enabled for both Ops Manager and the AppDB
+
+Default is `true`
 
 ### opsManager.omVersion
 
