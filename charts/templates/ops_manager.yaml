@@ -61,10 +61,12 @@ spec:
     mms.mail.transport: {{ .Values.opsManager.emailProtocol }}
     mms.minimumTLSVersion: TLSv1.2
 
+  {{- if or .Values.tls.enabled (not (hasKey .Values "tls.enabled"))}}
   security:
     tls:
-      secretRef:
-        name: {{ .Values.opsManager.tlsSecretName }}
+      ca: om-ca-cert
+    certsSecretPrefix: om
+  {{- end }}
 {{ if .Values.opsManager.extServiceEnabled }}
   externalConnectivity:
     type: {{ .Values.opsManager.extServiceType }}
@@ -79,11 +81,12 @@ spec:
     version: {{ .Values.appDB.mdbVersion }}
     passwordSecretKeyRef:
       name: {{ .Values.appDB.mongoDBAdminPasswdSecretName }} 
+    {{- if or .Values.tls.enabled (not (hasKey .Values "tls.enabled"))}}
     security:
       tls:
         ca: {{ .Values.appDB.CAConfigmapName  }}
-        secretRef:
-          name: {{ .Values.appDB.tlsSecretName }}
+      certsSecretPrefix: appdb
+    {{- end }}
     podSpec:
       podTemplate:
         spec:
@@ -156,18 +159,22 @@ spec:
     headDB:
       storage: {{ .Values.backups.head.storageSize }}
       storageClass: {{ .Values.backups.head.storageClass }}
+    {{- if .Values.backups.oplogStores }}
+    {{- if gt (len .Values.backups.oplogStores) 0  }}
     opLogStores:
-    {{- range .Values.backups.oplogStores.stores }}
+    {{- range .Values.backups.oplogStores }}
       - name: {{ .name }}
         mongodbResourceRef:
           name: {{ .mdbResource }}
         mongodbUserRef:
           name: {{ .userResource }}
     {{- end }}
-    {{- if .Values.backups.blockstores }}
-    {{- if gt (len .Values.backups.blockstores.stores) 0  }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.backups.blockStores }}
+    {{- if gt (len .Values.backups.blockStores) 0  }}
     blockStores:
-    {{- range .Values.backups.blockstores }}
+    {{- range .Values.backups.blockStores }}
       - name: {{ .name }}
         mongodbResourceRef:
           name: {{ .mdbResource }}

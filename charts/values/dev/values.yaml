@@ -2,12 +2,14 @@
 
 deploymentName: ops-manager
 
+tls:
+  enabled: true
+
 opsManager:
-  omVersion: 4.4.19
+  omVersion: 5.0.9
   replicas: 2
   adminUserSecret: om-admin-user
   binarySource: remote
-  tlsSecretName: ops-manager-cert
   emailServerHostname: mail.mongodb.local
   adminEmailAddress: support@mongodb.local
   fromEmailAddress: support@mongodb.local
@@ -24,7 +26,7 @@ opsManager:
   initPodLimitMemory: 2Gi
   initPodRequestsMemory: 1Gi
   localBinariesMountEnabled: false
-  localBinariesMountStorageClass: mongodb-binaries
+  localBinariesMountStorageClass: ops-manager-binaries
   localBinariesMountStorageSize: 5Gi
   extServiceEnabled: true
   extServiceType: NodePort
@@ -33,9 +35,8 @@ opsManager:
 
 appDB:
   replicas: 3
-  mdbVersion: 5.0.1-ent
+  mdbVersion: 5.0.5-ent
   mongoDBAdminPasswdSecretName: om-db-user
-  tlsSecretName: ops-manager-db-cert
   CAConfigmapName: custom-ca
   podLimitCPU: 2
   podRequestsCPU: 2
@@ -45,10 +46,10 @@ appDB:
   storageSize: 10Gi 
 
 backups:
-  enabled: false
-  members: 2
+  enabled: true
+  members: 1
   head:
-    binariesMountEnabled: false
+    binariesMountEnabled: true
     binariesStorageClass: ops-manager-binaries
     binariesStorageSize: 5Gi
     storageClass: ops-manager-backup-0
@@ -63,10 +64,10 @@ backups:
     initPodRequestsMemory: 1Gi
   oplogStores:
     - name: oplog0
-      mdbResource: oplog0
+      mdbResource: oplogstore0
       userResource: oplog0-om-user
-  blockstores:
+  blockStores:
     - name: blockstore0
       mdbResource: blockstore0
       userResource: blockstore0-om-user
-  s3stores:
+  s3stores: []
