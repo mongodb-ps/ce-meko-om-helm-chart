@@ -253,12 +253,13 @@ The following table describes the values required in the relevant `values.yaml`:
 |Key|Purpose|
 |--------------------------|------------------------------------|
 |deploymentName|The name for the Ops Manager deployment (becomes the Kubernetes resource name)|
-|tls.enabled|Boolean value to determine if TLS is enabled for Ops Manager and AppDB, default is `true`|
+|tls.enabled|Boolean value to determine if TLS is enabled for Ops Manager and AppDB|
 |opsManager.omVersion|Version of Ops Manager to use|
 |opsManager.replicas|Number of Ops Manager application servers to deploy|
 |opsManager.adminUserSecret|The name of the Kubernetes secret containing the first user's password for Ops Manager|
 |opsManager.binarySource|The source for the MongoDB binaries. Can be `local`, `hybrid`, or `remote`|
 |opsManager.tlsSecretName|The Kubernetes TLS secret containing the X.509 certificate for Ops Manager application servers|
+|opsManaer.centralUrl|The URL for the Ops Manager applications (possibly load balancer address), for external access. Optional|
 |opsManager.emailServerHostname|The email server FQDN|
 |opsManager.adminEmailAddress|The email address of the Admin user for Ops Manager|
 |opsManager.fromEmailAddress|The fram email address used by Ops Manager when sending emails|
@@ -280,7 +281,6 @@ The following table describes the values required in the relevant `values.yaml`:
 |opsManager.extServiceEnabled|Boolean to determine if access to Ops Manager from clients/users external to Kubernetes is required|
 |opsManager.extServiceType|The service type created for external access. Selection is `NodePort` or `LoadBalancer`|
 |opsManager.extServicePort|The Kubernetes port number to use for the NodePort, if `NodePort` is selected for `opsManager.extServiceType`|
-|opsManager.extCentralUrl|The URL, including port, that will be used by clients external to Kubernetes for the Ops Manager service|
 |appDB.replicas|Numer of members in the AppDB replica set. Should be 3 at the minimum|
 |appDB.mdbVersion|The version of MongoDB to use for the AppDB. Must match a tag in the `quay.io` registry|
 |appDB.mongoDBAdminPasswdSecretName|The name of the Kubernetes secret containing the admin user's password|
@@ -334,9 +334,7 @@ The name that will be used for the Ops Manager instance. Must be unique in the n
 
 ### tls.enabled
 
-Boolean to determine if TLS is enabled for both Ops Manager and the AppDB
-
-Default is `true`
+Boolean to determine if TLS is enabled for both Ops Manager and the AppDB.
 
 ### opsManager.omVersion
 

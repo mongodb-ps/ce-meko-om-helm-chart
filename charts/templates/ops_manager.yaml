@@ -48,7 +48,11 @@ spec:
     {{- if .Values.opsManager.centralUrl }}
     mms.centralUrl: {{ .Values.opsManager.centralUrl }}
     {{- else }}
+    {{ if or (not (hasKey .Values "tls")) (eq .Values.tls.enabled true) }}
     mms.centralUrl: https://{{ .Values.deploymentName }}-svc.{{ .Release.Namespace }}.svc.cluster.local:8443
+    {{- else }}
+    mms.centralUrl: http://{{ .Values.deploymentName }}-svc.{{ .Release.Namespace }}.svc.cluster.local:8080
+    {{- end }}
     {{- end }}
     mms.ignoreInitialUiSetup: "true"
     automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
@@ -61,7 +65,7 @@ spec:
     mms.mail.transport: {{ .Values.opsManager.emailProtocol }}
     mms.minimumTLSVersion: TLSv1.2
 
-  {{- if or .Values.tls.enabled (not (hasKey .Values "tls.enabled"))}}
+  {{- if eq .Values.tls.enabled true }}
   security:
     tls:
       ca: om-ca-cert
@@ -81,7 +85,7 @@ spec:
     version: {{ .Values.appDB.mdbVersion }}
     passwordSecretKeyRef:
       name: {{ .Values.appDB.mongoDBAdminPasswdSecretName }} 
-    {{- if or .Values.tls.enabled (not (hasKey .Values "tls.enabled"))}}
+    {{- if eq .Values.tls.enabled true }}
     security:
       tls:
         ca: {{ .Values.appDB.CAConfigmapName  }}

@@ -10,6 +10,7 @@ opsManager:
   replicas: 2
   adminUserSecret: om-admin-user
   binarySource: remote
+  centralUrl: https://ops-manager-svc.mongodb.svc.cluster.local:8443
   emailServerHostname: mail.mongodb.local
   adminEmailAddress: support@mongodb.local
   fromEmailAddress: support@mongodb.local
@@ -31,7 +32,6 @@ opsManager:
   extServiceEnabled: true
   extServiceType: NodePort
   extServicePort: 32111
-  extCentralUrl: mongod3.mongodb.local:32111
 
 appDB:
   replicas: 3
@@ -46,14 +46,14 @@ appDB:
   storageSize: 10Gi 
 
 backups:
-  enabled: true
+  enabled: false
   members: 1
   head:
     binariesMountEnabled: true
     binariesStorageClass: ops-manager-binaries
-    binariesStorageSize: 5Gi
+    binariesStorageSize: 1Gi
     storageClass: ops-manager-backup-0
-    storageSize: 4Gi
+    storageSize: 1Gi
     podLimitCPU: 2
     podRequestsCPU: 1
     podLimitMemory: 2Gi
@@ -63,11 +63,11 @@ backups:
     initPodLimitMemory: 2Gi
     initPodRequestsMemory: 1Gi
   oplogStores:
-    - name: oplog0
+    - name: oplogstore0
       mdbResource: oplogstore0
-      userResource: oplog0-om-user
+      userResource: oplogstore-oplog0-om-user
   blockStores:
     - name: blockstore0
       mdbResource: blockstore0
-      userResource: blockstore0-om-user
+      userResource: blockstore-blockstore0-om-user
   s3stores: []
