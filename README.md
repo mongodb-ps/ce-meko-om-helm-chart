@@ -150,7 +150,11 @@ This requires one Kubernetes TLS secret.
 
 The secrets contain the X.509 key and certificate. A Subject Alternate Name (SAN) entry must exist for the service.
 
-The certificate must include the name of FQDN external to Kubernetes as a Subject Alternate Name (SAN) if external access is required.
+The certificate must include the name of FQDN external to Kubernetes as a Subject Alternate Name (SAN) if external access is required, as well as the internal service name.
+
+The internal service name will be inform of:
+
+**\<deploymentName\>-svc.\<namespace\>.svc.cluster.local**
 
 The secret must be named as follows:
 
