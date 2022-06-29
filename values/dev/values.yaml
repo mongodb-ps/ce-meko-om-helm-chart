@@ -6,12 +6,12 @@ tls:
   enabled: true
 
 opsManager:
-  omVersion: 5.0.9
+  omVersion: 5.0.11
   replicas: 2
   adminUserSecret: om-admin-user
   binarySource: remote
   centralUrl: https://ops-manager-svc.mongodb.svc.cluster.local:8443
-  emailServerHostname: mail.mongodb.local
+  emailServerHostname: mail0.mongodb.local
   adminEmailAddress: support@mongodb.local
   fromEmailAddress: support@mongodb.local
   replyEmailAddress: support@mongodb.local

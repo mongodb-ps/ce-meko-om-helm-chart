@@ -54,6 +54,7 @@ spec:
     mms.centralUrl: http://{{ .Values.deploymentName }}-svc.{{ .Release.Namespace }}.svc.cluster.local:8080
     {{- end }}
     {{- end }}
+    
     mms.ignoreInitialUiSetup: "true"
     automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
     mms.adminEmailAddr: {{ .Values.opsManager.adminEmailAddress }}
