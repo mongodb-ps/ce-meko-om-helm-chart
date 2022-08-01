@@ -56,7 +56,7 @@ spec:
     {{- end }}
     
     mms.ignoreInitialUiSetup: "true"
-    automation.versions.source: {{ .Values.opsManager.binsarySource | default "remote" | quote }}
+    automation.versions.source: {{ .Values.opsManager.binarySource | default "remote" | quote }}
     mms.adminEmailAddr: {{ .Values.opsManager.adminEmailAddress }}
     mms.fromEmailAddr: {{ .Values.opsManager.fromEmailAddress }}
     mms.replyToEmailAddr: {{ .Values.opsManager.replyEmailAddress }}
@@ -96,6 +96,24 @@ spec:
       podTemplate:
         spec:
           initContainers:
+            - name: fix-nfs
+              securityContext:
+                runAsNonRoot: false
+                runAsUser: 0
+              image: quay.io/mongodb/mongodb-enterprise-init-database-ubi:1.0.9
+              command: ["/bin/sh", "-c"]
+              args:
+              - chown 2000:2000 -R /data /journal /var/log/mongodb-mms-automation
+              volumeMounts:
+              - mountPath: /data
+                name: data
+                subPath: data
+              - mountPath: /journal
+                name: data
+                subPath: journal
+              - mountPath: /var/log/mongodb-mms-automation
+                name: data
+                subPath: logs
             - name: mongodb-enterprise-init-appdb
               resources:
                 limits:
