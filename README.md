@@ -135,10 +135,10 @@ The certificate must include the whole certificate chain of the Certificate Auth
 
 This can be a common configmap if more than one deployment is in a Kubernetes namespace and Ops Manager Organisation.
 
-This is stored in a configMap is set in the relevant `values.yaml` as `opsManager.caConfigMap`. The name of the key in the configmap **MUST** be `mms-ca.crt`, this can be created via:
+This is stored as a configMap and must be named `om-ca-cert`. The name of the key in the configmap **MUST** be `mms-ca.crt`, this can be created via:
 
 ```shell
-kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create configmap <name-of-configmap> \
+kubectl --kubeconfig=<CONFIG_FILE> -n <NAMESPACE> create configmap om-ca-cert \
   --from-file=mms-ca.crt
 ```
 
