@@ -116,8 +116,8 @@ A series of Helm Charts to deploy MongoDB Ops Manager within Kubernetes with the
 2. Create [Ops Manager Access Token](#ops-manager-api-access-token-required) (Progammatic Access)
 3. Create Kubernetes `configmap` for [Ops Manager X.509 Certificate Authority (CA) certificate chain](#ca-certificate-for-ops-manager-required)
 4. Create Kubernetes `configmap` for [MongoDB deployments CA certificate chain](#ca-certificate-for-mongodb-deployments-highly-encouraged) - if requires - and seriously, this should just be a normal thing
-5. Create Kubernets secrets for the [MonogDB instances TLS and cluster authentication](#tls-pem-files-for-mongodb-deployments-highly-encouraged) - once again this is "if requires", but should be just a normal thing.....look at your life choices if you are not doing this!
-6. Create a Kubernetes secret for the [`root`](mongodb-first-user-required) user of the MongoDB deployment
+5. Create Kubernetes secrets for the [MonogDB instances TLS and cluster authentication](#tls-pem-files-for-mongodb-deployments-highly-encouraged) - once again this is "if requires", but should be just a normal thing.....look at your life choices if you are not doing this!
+6. Create a Kubernetes secret for the [`root`](#mongodb-first-user-required) user of the MongoDB deployment
 7. Create the `values.yaml` file for the deployment.
 
 
@@ -125,7 +125,7 @@ A series of Helm Charts to deploy MongoDB Ops Manager within Kubernetes with the
 
 The [MongoDB Enterprise Kubernetes Operator](https://docs.mongodb.com/kubernetes-operator/master/) must be installed and operation. Instructions on installing the MongoDB Kubernetes Operator can be found in the MongoDB [documentation](https://docs.mongodb.com/kubernetes-operator/master/installation/). It is highly recommended that MongoDB Professional Services be engaged to deploy and configure Ops Manager to ensure the deployment is secure and reliable.
 
-[Helm](https://helm.sh/docs/intro/install/) is required to be installed and [Helmfile](https://github.com/roboll/helmfile) is also highly recommended. If Helmfile is used you will also need [Helm-Diff](https://github.com/databus23/helm-diff).
+[Helm](https://helm.sh/docs/intro/install/) is required to be installed and [Helmfile](https://github.com/helmfile/helmfile) is also highly recommended. If Helmfile is used you will also need [Helm-Diff](https://github.com/databus23/helm-diff).
 
 ### CA Certificate for Ops Manager _REQUIRED_
 
